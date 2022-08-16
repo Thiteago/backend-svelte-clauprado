@@ -1,0 +1,24 @@
+{
+  "name": "projetoreact",
+  "version": "1.0.0",
+  "description": "projeto react",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Thiteago/BackEnd-ProjetoReact.git"
+  },
+  "author": "Thiago David",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Thiteago/BackEnd-ProjetoReact/issues"
+  },
+  "homepage": "https://github.com/Thiteago/BackEnd-ProjetoReact#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "nodeman": "^1.1.2",
+    "nodemon": "^2.0.19"
+  }
+}
