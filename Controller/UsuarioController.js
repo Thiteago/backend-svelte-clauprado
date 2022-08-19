@@ -1,4 +1,11 @@
+const Usuario = require('../Model/Usuario');
+const CriaUsuario = require('../DAO/CreateUser');
+
+var NovoUsuario = new Usuario();
+
 exports.post = (req, res, next) => {
+  NovoUsuario = req.body;
+  CriaUsuario.CreateUser(NovoUsuario);
   res.sendStatus(201);
 };
 
