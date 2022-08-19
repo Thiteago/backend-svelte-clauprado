@@ -1,3 +1,5 @@
+const client = require('../db');
+const clientPool = require('../db');
 const db = require('../db');
 const Usuario = require('../Model/Usuario');
 
@@ -25,4 +27,17 @@ async function CreateUser(NovoUsuario) {
   await db.end();
 }
 
+async function authUser(logUser) {
+  await db.connect();
+  var result = [];
+
+  const select = `SELECT * FROM USUARIOS WHERE EMAIL = '$1' AND SENHA = $2'`;
+  const values = [logUser.email, logUser.senha];
+
+  result = db.query(select, values);
+  console.log(result);
+  await db.end();
+}
+
+module.exports.authUser = authUser;
 module.exports.CreateUser = CreateUser;

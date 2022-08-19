@@ -1,11 +1,25 @@
 const Usuario = require('../Model/Usuario');
-const CriaUsuario = require('../DAO/CreateUser');
+const CriaUsuario = require('../DAO/User');
+const AutenticaUsuario = require('../DAO/User');
+
+class LogUsuario {
+  constructor(email, senha) {
+    (this.email = email), (this.senha = senha);
+  }
+}
 
 var NovoUsuario = new Usuario();
+var inputLogin = new LogUsuario();
 
-exports.post = (req, res, next) => {
+exports.postNovoUsuario = (req, res, next) => {
   NovoUsuario = req.body;
   CriaUsuario.CreateUser(NovoUsuario);
+  res.sendStatus(201);
+};
+
+exports.postLogin = (req, res) => {
+  inputLogin = req.body;
+  AutenticaUsuario.authUser(inputLogin);
   res.sendStatus(201);
 };
 
