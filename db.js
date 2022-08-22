@@ -1,15 +1,6 @@
-const pg = require('pg');
 const { Pool } = require('pg');
 
-const client = new pg.Client({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'projetoreact',
-  password: 'paprica13',
-  port: 5432,
-});
-
-const clientPool = new Pool({
+const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
   database: 'projetoreact',
@@ -19,5 +10,4 @@ const clientPool = new Pool({
   connectionTimeoutMillis: 0,
 });
 
-module.exports = clientPool;
-module.exports = client;
+module.exports = pool;

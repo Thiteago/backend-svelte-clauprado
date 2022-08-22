@@ -19,8 +19,15 @@ exports.postNovoUsuario = (req, res, next) => {
 
 exports.postLogin = (req, res) => {
   inputLogin = req.body;
-  AutenticaUsuario.authUser(inputLogin);
-  res.sendStatus(201);
+  var Result = AutenticaUsuario.authUser(inputLogin);
+  Result.then(() => {
+    console.log('Retorno da consulta authUser no Controller ' + Result);
+    if (Result == 1) {
+      res.sendStatus(201);
+    } else {
+      res.sendStatus(400);
+    }
+  });
 };
 
 exports.put = (req, res, next) => {

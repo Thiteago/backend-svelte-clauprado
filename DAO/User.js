@@ -1,15 +1,12 @@
-const client = require('../db');
-const clientPool = require('../db');
-const db = require('../db');
-const Usuario = require('../Model/Usuario');
+const pool = require('../db');
 
 async function CreateUser(NovoUsuario) {
-  await db.connect();
+  await pool.connect();
 
   const queryUsuario =
     'INSERT INTO Usuarios (nome, dataNascimento, email, senha, cpf, rua, numeroRua, bairro, cidade, cep, numeroTel, numeroCel) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)';
 
-  await db.query(queryUsuario, [
+  await pool.query(queryUsuario, [
     NovoUsuario.nome,
     NovoUsuario.dataNascimento,
     NovoUsuario.email,
@@ -23,20 +20,36 @@ async function CreateUser(NovoUsuario) {
     NovoUsuario.numeroTel,
     NovoUsuario.numeroCel,
   ]);
+}
 
-  await db.end();
+async function consulta(query, valores) {
+  var TemResultado;
+  const result = await pool.query(query, valores, (err, res) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    if (res.rows.length >= 1) {
+      TemResultado = 1;
+    }
+  });
+  console.log('Resultado funcao consulta: ' + result);
+  result.then(() => {
+    return TemResultado;
+  });
 }
 
 async function authUser(logUser) {
-  await db.connect();
-  var result = [];
-
-  const select = `SELECT * FROM USUARIOS WHERE EMAIL = '$1' AND SENHA = $2'`;
+  await pool.connect();
+  console.log(logUser.email, logUser.senha);
+  const select = 'SELECT * FROM USUARIOS WHERE EMAIL = $1 AND SENHA = $2';
   const values = [logUser.email, logUser.senha];
 
-  result = db.query(select, values);
-  console.log(result);
-  await db.end();
+  const Res = consulta(select, values);
+  Res.then(() => {
+    console.log('Retorno da consulta dentro do AuthUser ' + Res);
+    return Res;
+  });
 }
 
 module.exports.authUser = authUser;
