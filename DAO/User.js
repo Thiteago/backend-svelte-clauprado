@@ -23,33 +23,23 @@ async function CreateUser(NovoUsuario) {
 }
 
 async function consulta(query, valores) {
-  var TemResultado;
-  const result = await pool.query(query, valores, (err, res) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    if (res.rows.length >= 1) {
-      TemResultado = 1;
-    }
-  });
-  console.log('Resultado funcao consulta: ' + result);
-  result.then(() => {
-    return TemResultado;
-  });
+  await pool.connect();
+  const result = await pool.query(query, valores);
+  if (result.rowCount >= 1) {
+    return 1;
+  } else {
+    return 2;
+  }
 }
 
 async function authUser(logUser) {
-  await pool.connect();
   console.log(logUser.email, logUser.senha);
   const select = 'SELECT * FROM USUARIOS WHERE EMAIL = $1 AND SENHA = $2';
   const values = [logUser.email, logUser.senha];
 
-  const Res = consulta(select, values);
-  Res.then(() => {
-    console.log('Retorno da consulta dentro do AuthUser ' + Res);
-    return Res;
-  });
+  const Res = await consulta(select, values);
+  console.log(Res);
+  return Res;
 }
 
 module.exports.authUser = authUser;

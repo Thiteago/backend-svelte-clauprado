@@ -1,6 +1,6 @@
 const Usuario = require('../Model/Usuario');
 const CriaUsuario = require('../DAO/User');
-const AutenticaUsuario = require('../DAO/User');
+const autenticaUsuario = require('../DAO/User');
 
 class LogUsuario {
   constructor(email, senha) {
@@ -17,17 +17,15 @@ exports.postNovoUsuario = (req, res, next) => {
   res.sendStatus(201);
 };
 
-exports.postLogin = (req, res) => {
+exports.postLogin = async (req, res) => {
   inputLogin = req.body;
-  var Result = AutenticaUsuario.authUser(inputLogin);
-  Result.then(() => {
-    console.log('Retorno da consulta authUser no Controller ' + Result);
-    if (Result == 1) {
-      res.sendStatus(201);
-    } else {
-      res.sendStatus(400);
-    }
-  });
+  var Result = await autenticaUsuario.authUser(inputLogin);
+
+  if (Result == 1) {
+    res.sendStatus(201);
+  } else {
+    res.sendStatus(401);
+  }
 };
 
 exports.put = (req, res, next) => {
