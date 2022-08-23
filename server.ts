@@ -1,5 +1,7 @@
-const express = require('express');
-const cors = require('cors');
+import express from "express"
+import cors from "cors"
+import { Router } from "express";
+import { router } from "./src/Routes/UsuarioRoute";
 const app = express();
 
 const corsOptions = {
@@ -10,6 +12,5 @@ const corsOptions = {
 };
 app.use(express.json());
 app.use(cors(corsOptions));
-app.listen(3333);
-
-require('./Routes/index')(app);
+app.use(router);
+app.listen(3333, () => console.log('Server is running on port 3333'));
