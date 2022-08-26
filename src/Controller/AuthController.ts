@@ -5,9 +5,10 @@ import { prisma } from "../utils/prisma";
 
 export class AuthController {
   async authenticate(req: Request, res: Response) {
-    const data = req.body;
-    const email = data.email.email
-    const senha = data.email.senha
+    const {
+        email,
+        senha
+    } = req.body;
 
     const user = await prisma.user.findUnique({
         where: {
