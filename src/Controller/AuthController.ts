@@ -5,11 +5,15 @@ import { prisma } from "../utils/prisma";
 
 export class AuthController {
   async authenticate(req: Request, res: Response) {
-    const {
-        email,
-        senha,
-    } = req.body;
-    const user = await prisma.user.findUnique({where: {email}});
+    const data = req.body;
+    const email = data.email.email
+    const senha = data.email.senha
+
+    const user = await prisma.user.findUnique({
+        where: {
+            email
+        },
+    });
 
     if(!user){
         return res.json({error: "User not found"})
