@@ -14,6 +14,12 @@ export class AuthController {
         where: {
             email
         },
+        select: {
+            id: true,
+            email: true,
+            senha: true,
+            nome: true
+        }
     });
 
     if(!user){
@@ -25,7 +31,7 @@ export class AuthController {
     }
 
     const token = sign({id: user.id}, "secret", {expiresIn: "1d"});
-    const {id} = user;
-    return res.json({user: {id, email}, token})
+    const {id, nome} = user;
+    return res.json({user: {id, email, nome}, token})
   }
 }
