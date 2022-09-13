@@ -8,6 +8,9 @@
 # testing
 /coverage
 
+#Token WhatsappBot
+/tokens
+
 # production
 /build
 
