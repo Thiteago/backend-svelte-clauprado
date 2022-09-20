@@ -1,7 +1,8 @@
 import express from "express"
 import cors from "cors"
 import { router } from "./src/Routes/UsuarioRoute";
-import { ConnectBot } from "./src/WhatsappBot/app";
+
+
 
 const app = express();
 
@@ -17,4 +18,4 @@ app.use(cors(corsOptions));
 app.use(router);
 app.listen(3333, () => console.log('Server is running on port 3333'));
 
-ConnectBot()
+

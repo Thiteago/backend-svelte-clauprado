@@ -53,4 +53,17 @@ export class UsuarioController {
     const users = await prisma.user.findMany();
     return res.json({users})
   }
+
+  async mostrarInfo(req: Request, res: Response){
+    const idPerson = Number(req.params.id)
+    console.log(idPerson)
+
+    const getUser = await prisma.user.findUnique({
+      where: {
+        id: idPerson,
+      },
+    })
+
+    return res.json({getUser})
+  }
 }
