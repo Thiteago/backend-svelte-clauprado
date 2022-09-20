@@ -12,6 +12,7 @@ router.post("/NovoUsuario", usuariocontroller.cadastrar);
 router.get('/Usuarios', AuthMiddleware ,usuariocontroller.listar);
 router.post("/Autenticar", authcontroller.authenticate)
 router.get('/Usuarios/:id/dados', usuariocontroller.mostrarInfo)
+router.patch('/Usuarios/:id/Alterar', usuariocontroller.alterarUser)
 
 
 

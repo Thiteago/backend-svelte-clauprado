@@ -24,4 +24,5 @@ model User {
     cep            String
     numeroTel      String
     numeroCel      String
+    cargo          String @default("Usuario")
 }

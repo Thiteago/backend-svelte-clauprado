@@ -16,7 +16,8 @@ export class UsuarioController {
          cidade,
          cep,
          numeroTel,
-         numeroCel
+         numeroCel,
+         cargo
     } = req.body;
 
     const userExists = await prisma.user.findUnique({where: {email}})
@@ -41,7 +42,8 @@ export class UsuarioController {
          cidade,
          cep,
          numeroTel,
-         numeroCel
+         numeroCel,
+         cargo: "Usuario"
       },
     });
 
@@ -56,7 +58,6 @@ export class UsuarioController {
 
   async mostrarInfo(req: Request, res: Response){
     const idPerson = Number(req.params.id)
-    console.log(idPerson)
 
     const getUser = await prisma.user.findUnique({
       where: {
@@ -64,6 +65,23 @@ export class UsuarioController {
       },
     })
 
-    return res.json({getUser})
+    return res.json(getUser)
+  }
+
+  async alterarUser(req: Request, res: Response){
+    const idPerson = Number(req.params.id)
+    const{email, numeroCel} = req.body
+
+    const updateUser = await prisma.user.update({
+      where:{
+        id: idPerson
+      },
+      data:{
+        email: email,
+        numeroCel: numeroCel
+      }
+    })
+
+    return res.sendStatus(201)
   }
 }
