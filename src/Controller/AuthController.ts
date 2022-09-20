@@ -18,6 +18,7 @@ export class AuthController {
             id: true,
             email: true,
             senha: true,
+            cargo: true,
             nome: true
         }
     });
@@ -31,7 +32,7 @@ export class AuthController {
     }
 
     const token = sign({id: user.id}, "secret", {expiresIn: "1d"});
-    const {id, nome} = user;
-    return res.json({user: {id, email, nome}, token})
+    const {id, nome, cargo} = user;
+    return res.json({user: {id, email, nome, cargo}, token})
   }
 }

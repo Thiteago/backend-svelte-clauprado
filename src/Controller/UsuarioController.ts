@@ -72,6 +72,18 @@ export class UsuarioController {
     const idPerson = Number(req.params.id)
     const{email, numeroCel} = req.body
 
+    const checkEmail = await prisma.user.findFirst({
+      where:{
+        email: email
+      }
+    })
+
+    console.log(checkEmail)
+
+    if(checkEmail?.email != null ){
+      return res.sendStatus(400)
+    }
+    
     const updateUser = await prisma.user.update({
       where:{
         id: idPerson
