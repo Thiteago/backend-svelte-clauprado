@@ -26,3 +26,18 @@ model User {
     numeroCel      String
     cargo          String @default("Usuario")
 }
+
+model Produto {
+    id             Int      @id @default(autoincrement())
+    nome           String
+    descricao      String
+    dataCriacao    String
+    dataPublicacao DateTime @default(now())
+    tipo           String
+    valor          Float
+    altura         String
+    largura        String
+    comprimento    String
+    material       String
+    categoria      String
+}

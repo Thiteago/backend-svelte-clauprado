@@ -8,16 +8,16 @@ export class UsuarioController {
       nome,
       dataNascimento,
       email,
-        senha,
-         cpf,
-         rua,
-         numeroRua,
-         bairro,
-         cidade,
-         cep,
-         numeroTel,
-         numeroCel,
-         cargo
+      senha,
+      cpf,
+      rua,
+      numeroRua,
+      bairro,
+      cidade,
+      cep,
+      numeroTel,
+      numeroCel,
+      cargo
     } = req.body;
 
     const userExists = await prisma.user.findUnique({where: {email}})
@@ -35,15 +35,15 @@ export class UsuarioController {
         dataNascimento,
         email,
         senha: hash_password,
-         cpf,
-         rua,
-         numeroRua,
+        cpf,
+        rua,
+        numeroRua,
         bairro,
-         cidade,
-         cep,
-         numeroTel,
-         numeroCel,
-         cargo: "Usuario"
+        cidade,
+        cep,
+        numeroTel,
+        numeroCel,
+        cargo: "Usuario"
       },
     });
 
@@ -78,7 +78,6 @@ export class UsuarioController {
       }
     })
 
-    console.log(checkEmail)
 
     if(checkEmail?.email != null ){
       return res.sendStatus(400)

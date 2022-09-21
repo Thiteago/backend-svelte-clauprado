@@ -5,14 +5,14 @@ import { AuthMiddleware } from "../middlewares/auth";
 
 const usuariocontroller = new UsuarioController()
 const authcontroller = new AuthController()
-export const router = Router();
+export const routerUser = Router();
 
 
-router.post("/NovoUsuario", usuariocontroller.cadastrar);
-router.get('/Usuarios', AuthMiddleware ,usuariocontroller.listar);
-router.post("/Autenticar", authcontroller.authenticate)
-router.get('/Usuarios/:id/dados', usuariocontroller.mostrarInfo)
-router.patch('/Usuarios/:id/Alterar', usuariocontroller.alterarUser)
+routerUser.post("/NovoUsuario", usuariocontroller.cadastrar);
+routerUser.get('/Usuarios', AuthMiddleware ,usuariocontroller.listar);
+routerUser.post("/Autenticar", authcontroller.authenticate)
+routerUser.get('/Usuarios/:id/dados', usuariocontroller.mostrarInfo)
+routerUser.patch('/Usuarios/:id/Alterar', usuariocontroller.alterarUser)
 
 
 
