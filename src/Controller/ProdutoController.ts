@@ -5,6 +5,9 @@ import { prisma } from "../utils/prisma";
 export class ProdutoController{
     async cadastrar (req: Request, res: Response){
         let resultStatus = 0
+        const id = req.file?.filename.split('_', 1)
+        const file = req.file
+        console.log(file)
 
         const {
             nome,           
@@ -17,7 +20,7 @@ export class ProdutoController{
             largura,        
             comprimento,    
             material,
-            categoria       
+            categoria,     
         } = req.body
 
         const produto = await prisma.produto.create({
@@ -32,22 +35,17 @@ export class ProdutoController{
                 largura,        
                 comprimento,    
                 material ,
-                categoria
+                categoria,
+                imagens: id
             },
         })
         .then((result) => {
             resultStatus = 201
         }).catch((error) =>{
+            console.log(error)
             resultStatus = 500
         })
 
         res.sendStatus(resultStatus)
     }
-
-    async inserirImagem(req: Request, res: Response){{
-        console.log(req.files)
-
-        res.status(201)
-        return res.json(req.file?.filename)
-    }}
 }

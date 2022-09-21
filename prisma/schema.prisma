@@ -40,4 +40,5 @@ model Produto {
     comprimento    String
     material       String
     categoria      String
+    imagens        String[]
 }

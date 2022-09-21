@@ -9,8 +9,8 @@ const produtocontroller = new ProdutoController()
 export const routerProduto = Router();
 
 
-routerProduto.post("/Produto/Cadastrar", produtocontroller.cadastrar);
-routerProduto.post("/Upload", upload.single('file'), produtocontroller.inserirImagem)
+routerProduto.post("/Produto/Cadastrar",upload.array('file[]', 5), produtocontroller.cadastrar);
+
 
 
 
