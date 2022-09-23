@@ -4,10 +4,19 @@ import { prisma } from "../utils/prisma";
 
 export class ProdutoController{
     async cadastrar (req: Request, res: Response){
-        let resultStatus = 0
-        const id = req.file?.filename.split('_', 1)
-        const file = req.file
-        console.log(file)
+        let resultStatus = 201
+        let ids: Array<string> = [];
+
+        var myfiles = JSON.parse(JSON.stringify(req.files))
+
+        myfiles.map((item: any) => {
+            ids.push(item.filename)
+        })
+
+        for(var i = 0; i< ids.length; i++){
+            ids[i] = ids[i].split('_',1)[0]
+        }
+
 
         const {
             nome,           
@@ -36,7 +45,7 @@ export class ProdutoController{
                 comprimento,    
                 material ,
                 categoria,
-                imagens: id
+                imagens: ids
             },
         })
         .then((result) => {
