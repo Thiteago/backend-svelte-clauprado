@@ -57,4 +57,63 @@ export class ProdutoController{
 
         res.sendStatus(resultStatus)
     }
+    
+    async listar (req: Request, res: Response){
+        const produtos = await prisma.produto.findMany()
+        return res.json({produtos})
+    }
+
+    async alterar (req: Request, res: Response){
+        const idProduto = Number(req.params.id)
+
+        const {
+            nome,
+            descricao,
+            dataCriacao,
+            tipo,
+            valor,
+            altura,
+            largura,
+            comprimento,
+            material,
+            categoria,
+            imagens
+        } = req.body
+
+        const checkNome = await prisma.produto.findFirst({
+            where:{
+              nome: nome
+            }
+        })
+
+
+
+
+        if(checkNome?.nome != null ){
+            if(checkNome.nome == nome && checkNome.id == idProduto){
+                const updateUser = await prisma.produto.update({
+                    where:{
+                      id: idProduto
+                    },
+                    data:{
+                        nome,
+                        descricao,
+                        dataCriacao,
+                        tipo,
+                        valor: parseFloat(valor),
+                        altura,
+                        largura,
+                        comprimento,
+                        material,
+                        categoria,
+                        imagens
+                    }
+                })
+                return res.sendStatus(201)
+            }
+            return res.sendStatus(400)
+        }
+
+        
+    }
 }

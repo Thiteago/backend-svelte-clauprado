@@ -10,6 +10,8 @@ export const routerProduto = Router();
 
 
 routerProduto.post("/Produto/Cadastrar",upload.array('file[]', 5), produtocontroller.cadastrar);
+routerProduto.get("/Produto", produtocontroller.listar);
+routerProduto.patch("/Produto/:id/Alterar", produtocontroller.alterar)
 
 
 
