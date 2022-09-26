@@ -87,33 +87,28 @@ export class ProdutoController{
         })
 
 
-
-
-        if(checkNome?.nome != null ){
-            if(checkNome.nome == nome && checkNome.id == idProduto){
-                const updateUser = await prisma.produto.update({
-                    where:{
-                      id: idProduto
-                    },
-                    data:{
-                        nome,
-                        descricao,
-                        dataCriacao,
-                        tipo,
-                        valor: parseFloat(valor),
-                        altura,
-                        largura,
-                        comprimento,
-                        material,
-                        categoria,
-                        imagens
-                    }
-                })
-                return res.sendStatus(201)
-            }
+        if(checkNome?.nome == null || checkNome.id == idProduto){
+            const updateUser = await prisma.produto.update({
+                where:{
+                  id: idProduto
+                },
+                data:{
+                    nome,
+                    descricao,
+                    dataCriacao,
+                    tipo,
+                    valor: parseFloat(valor),
+                    altura,
+                    largura,
+                    comprimento,
+                    material,
+                    categoria,
+                    imagens
+                }
+            })
+            return res.sendStatus(201)
+        }else{
             return res.sendStatus(400)
         }
-
-        
     }
 }
