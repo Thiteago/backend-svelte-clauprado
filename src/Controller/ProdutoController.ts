@@ -32,28 +32,34 @@ export class ProdutoController{
             categoria,     
         } = req.body
 
-        const produto = await prisma.produto.create({
-            data:{
-                nome,           
-                descricao,      
-                dataCriacao,    
-                dataPublicacao,  
-                tipo,           
-                valor: parseFloat(valor),          
-                altura,         
-                largura,        
-                comprimento,    
-                material ,
-                categoria,
-                imagens: ids
-            },
+        const checkNome = await prisma.produto.findFirst({
+            where:{
+              nome: nome
+            }
         })
-        .then((result) => {
-            resultStatus = 201
-        }).catch((error) =>{
-            console.log(error)
+        
+        if(checkNome == null){
+            const produto = await prisma.produto.create({
+                data:{
+                    nome,           
+                    descricao,      
+                    dataCriacao,    
+                    dataPublicacao,  
+                    tipo,           
+                    valor: parseFloat(valor),          
+                    altura,         
+                    largura,        
+                    comprimento,    
+                    material ,
+                    categoria,
+                    imagens: ids
+                },
+            }).then((result) => {
+                resultStatus = 201
+            })
+        }else{
             resultStatus = 500
-        })
+        }
 
         res.sendStatus(resultStatus)
     }
