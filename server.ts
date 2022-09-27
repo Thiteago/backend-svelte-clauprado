@@ -9,7 +9,7 @@ const app = express();
 
 const corsOptions = {
   Origin: '*',
-  methods: ['GET', 'PUT', 'POST', 'PATCH'],
+  methods: ['GET', 'PUT', 'POST', 'PATCH', 'DELETE'],
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };

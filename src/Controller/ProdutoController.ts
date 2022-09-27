@@ -117,4 +117,16 @@ export class ProdutoController{
             return res.sendStatus(400)
         }
     }
+
+    async excluir (req: Request, res: Response){
+        const idProduto = Number(req.params.id)
+
+        const deleteProduto = await prisma.produto.delete({
+            where:{
+                id: idProduto
+            }
+        })
+
+        res.sendStatus(201)
+    }
 }
