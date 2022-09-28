@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../utils/prisma";
+import glob from 'glob'
 
 
 export class ProdutoController{
@@ -128,5 +129,70 @@ export class ProdutoController{
         })
 
         res.sendStatus(201)
+    }
+
+
+
+    async enviarPath (req: Request, res: Response){
+        const idProduto = Number(req.params.id)
+        const imagens: string[] = []
+        var caminhos: string[] = []
+ 
+        const query = await prisma.produto.findMany({
+            where:{
+                id: idProduto
+            }
+        })
+        
+
+        query.map((item) => {
+            item.imagens.map((element) => {
+                imagens.push(element)
+            })
+        })
+
+        
+        glob("public/uploads/*.jpg", function (er, files) : any {
+
+            imagens.map((element) => {
+                files.map((item) => {
+                    if(item.includes(element)){
+                        caminhos.push(item)
+                    }
+                })
+            })
+        
+            
+        })
+
+        glob("public/uploads/*.jpeg", function (er, files) {
+            imagens.map((element) => {
+                files.map((item) => {
+                    if(item.includes(element)){
+                        caminhos.push(item)
+                    }
+                })
+            })
+
+            
+        })
+
+        glob("public/uploads/*.png", function (er, files) {
+            imagens.map((element) => {
+                files.map((item) => {
+                    if(item.includes(element)){
+                        caminhos.push(item)
+                    }
+                })
+            })
+
+            caminhos.map((item, i) => {
+                caminhos[i] = item.replace('public/uploads/', '')
+            })
+
+            res.json({caminhos})
+        })
+        
+
     }
 }

@@ -13,6 +13,7 @@ routerProduto.post("/Produto/Cadastrar",upload.array('file[]', 5), produtocontro
 routerProduto.get("/Produto", produtocontroller.listar);
 routerProduto.patch("/Produto/:id/Alterar", produtocontroller.alterar)
 routerProduto.delete("/Produto/:id/Deletar", produtocontroller.excluir)
+routerProduto.get("/Produto/ImagePath/:id", produtocontroller.enviarPath)
 
 
 
