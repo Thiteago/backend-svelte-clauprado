@@ -25,7 +25,6 @@ export class UsuarioController {
     const userExists = await prisma.user.findUnique({where: {email}})
 
     if(userExists){
-      res.sendStatus(409)
       return res.json({error: "User already exists"})
     }
 
