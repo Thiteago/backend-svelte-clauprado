@@ -131,7 +131,15 @@ export class ProdutoController{
         res.sendStatus(201)
     }
 
-
+    async listarpeloid (req: Request, res: Response){
+        const idProduto = Number(req.params.id)
+        const produto = await prisma.produto.findUnique({
+            where: {
+                id: idProduto
+            }
+        })
+        return res.json({produto})
+    }
 
     async enviarPath (req: Request, res: Response){
         const idProduto = Number(req.params.id)
