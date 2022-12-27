@@ -20,15 +20,11 @@ export class UsuarioController {
       cargo
     } = req.body;
 
-    console.log(req.body)
-
     const userExists = await prisma.user.findUnique({where: {email}})
 
     if(userExists){
       return res.status(401).json({message: "User Already Exists!"})
     }
-
-
     const hash_password = await hash(senha, 8)
     
     const user = await prisma.user.create({
@@ -49,8 +45,7 @@ export class UsuarioController {
       },
     });
 
-    res.sendStatus(201)
-    return res.json({user})
+    return res.status(201).json({user})
   }
 
   async listar(req: Request, res: Response){
@@ -74,27 +69,29 @@ export class UsuarioController {
     const idPerson = Number(req.params.id)
     const{email, numeroCel} = req.body
 
-    const checkEmail = await prisma.user.findFirst({
-      where:{
-        email: email
-      }
-    })
+    console.log(numeroCel)
 
-
-    if(checkEmail?.email != null ){
-      return res.sendStatus(400)
+    if(email == '' && numeroCel == ''){
+      return
+    }else if(email != ''){
+      await prisma.user.update({
+        where:{
+          id: idPerson
+        },
+        data:{
+          email: email
+        }
+      })
+    }else{
+      await prisma.user.update({
+        where:{
+          id: idPerson
+        },
+        data:{
+          numeroCel: numeroCel
+        }
+      })
     }
-    
-    const updateUser = await prisma.user.update({
-      where:{
-        id: idPerson
-      },
-      data:{
-        email: email,
-        numeroCel: numeroCel
-      }
-    })
-
     return res.sendStatus(201)
   }
 }
