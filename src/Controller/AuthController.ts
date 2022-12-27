@@ -24,11 +24,11 @@ export class AuthController {
     });
 
     if(!user){
-        return res.json({error: "User not found"})
+        return res.status(401).json({error: "User not found"})
     }
     const isValuePassword = await compare(senha, user.senha)
     if(!isValuePassword){
-        return res.json({error: "Invalid Password"})
+        return res.status(401).json({error: "Invalid Password"})
     }
 
     const token = sign({id: user.id}, "secret", {expiresIn: "1d"});
