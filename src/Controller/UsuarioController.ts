@@ -69,29 +69,32 @@ export class UsuarioController {
     const idPerson = Number(req.params.id)
     const{email, numeroCel} = req.body
 
-    console.log(numeroCel)
+    const userExists = await prisma.user.findUnique({where: {email}})
 
-    if(email == '' && numeroCel == ''){
-      return
-    }else if(email != ''){
-      await prisma.user.update({
-        where:{
-          id: idPerson
-        },
-        data:{
-          email: email
-        }
-      })
+    if(userExists?.id == idPerson){
+      if(userExists.numeroCel != numeroCel){
+        await prisma.user.update({
+          where: {
+            id: idPerson
+          },
+          data:{
+            numeroCel: numeroCel
+          }
+        })
+        return res.status(201).json({message: 'Alterado com sucesso'})
+      }else if(userExists.email != email){
+        await prisma.user.update({
+          where:{
+            id: idPerson
+          },
+          data:{
+            email: email
+          }
+        })
+        res.status(201)
+      }
     }else{
-      await prisma.user.update({
-        where:{
-          id: idPerson
-        },
-        data:{
-          numeroCel: numeroCel
-        }
-      })
+      return res.status(401).json({error: "Email ja esta sendo utilizado por outro usuário"})
     }
-    return res.sendStatus(201)
   }
 }
