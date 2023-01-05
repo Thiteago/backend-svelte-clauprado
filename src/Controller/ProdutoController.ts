@@ -9,6 +9,8 @@ export class ProdutoController{
         let ids: Array<string> = [];
 
         var myfiles = JSON.parse(JSON.stringify(req.files))
+        
+        
 
         myfiles.map((item: any) => {
             ids.push(item.filename)
@@ -67,7 +69,7 @@ export class ProdutoController{
     
     async listar (req: Request, res: Response){
         const produtos = await prisma.produto.findMany()
-        return res.json({produtos})
+        return res.json(produtos)
     }
 
     async alterar (req: Request, res: Response){

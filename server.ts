@@ -7,9 +7,6 @@ import path from 'path'
 
 const app = express();
 
-
-
-
 const corsOptions = {
   Origin: '*',
   methods: ['GET', 'PUT', 'POST', 'PATCH', 'DELETE'],
