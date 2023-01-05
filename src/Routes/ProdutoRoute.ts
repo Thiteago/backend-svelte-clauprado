@@ -5,11 +5,12 @@ import { storage } from "../utils/multerConfig";
 
 const upload = multer({storage: storage})
 
+
 const produtocontroller = new ProdutoController()
 export const routerProduto = Router();
 
 
-routerProduto.post("/Produto/Cadastrar",upload.array('file[]', 5), produtocontroller.cadastrar);
+routerProduto.post("/Produto/Cadastrar",upload.array('imagens', 4), produtocontroller.cadastrar);
 routerProduto.get("/Produto", produtocontroller.listar);
 routerProduto.get("/Produto/:id", produtocontroller.listarpeloid)
 routerProduto.patch("/Produto/:id/Alterar", produtocontroller.alterar)
