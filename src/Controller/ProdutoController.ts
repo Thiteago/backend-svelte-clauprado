@@ -74,6 +74,18 @@ export class ProdutoController{
 
     async alterar (req: Request, res: Response){
         const idProduto = Number(req.params.id)
+        let ids: Array<string> = [];
+        let myfiles = JSON.parse(JSON.stringify(req.files))
+        
+        
+
+        myfiles.map((item: any) => {
+            ids.push(item.filename)
+        })
+
+        for(var i = 0; i< ids.length; i++){
+            ids[i] = ids[i].split('_',1)[0]
+        }
 
         const {
             nome,
@@ -85,9 +97,9 @@ export class ProdutoController{
             largura,
             comprimento,
             material,
-            categoria,
-            imagens
+            categoria
         } = req.body
+    
 
         const checkNome = await prisma.produto.findFirst({
             where:{
@@ -97,37 +109,58 @@ export class ProdutoController{
 
 
         if(checkNome?.nome == null || checkNome.id == idProduto){
-            const updateUser = await prisma.produto.update({
-                where:{
-                  id: idProduto
-                },
-                data:{
-                    nome,
-                    descricao,
-                    dataCriacao,
-                    tipo,
-                    valor: parseFloat(valor),
-                    altura,
-                    largura,
-                    comprimento,
-                    material,
-                    categoria,
-                    imagens
-                }
-            })
-            return res.sendStatus(201)
+            if(myfiles.length > 0){
+                await prisma.produto.update({
+                    where:{
+                    id: idProduto
+                    },
+                    data:{
+                        nome,
+                        descricao,
+                        dataCriacao,
+                        tipo,
+                        valor: parseFloat(valor),
+                        altura,
+                        largura,
+                        comprimento,
+                        material,
+                        categoria,
+                        imagens : ids
+                    }
+                })
+                return res.sendStatus(201)
+            }else{
+							await prisma.produto.update({
+								where:{
+								id: idProduto
+								},
+								data:{
+										nome,
+										descricao,
+										dataCriacao,
+										tipo,
+										valor: parseFloat(valor),
+										altura,
+										largura,
+										comprimento,
+										material,
+										categoria
+								}
+						})
+						return res.sendStatus(201)
+						}
         }else{
-            return res.sendStatus(400)
-        }
+				return res.sendStatus(500)
+				}
     }
 
     async excluir (req: Request, res: Response){
         const idProduto = Number(req.params.id)
 
-        const deleteProduto = await prisma.produto.delete({
-            where:{
-                id: idProduto
-            }
+        await prisma.produto.delete({
+          where:{
+            id: idProduto
+          }
         })
 
         res.sendStatus(201)
@@ -140,7 +173,7 @@ export class ProdutoController{
                 id: idProduto
             }
         })
-        return res.json({produto})
+        return res.json(produto)
     }
 
     async enviarPath (req: Request, res: Response){
