@@ -10,8 +10,6 @@ export class ProdutoController{
 
         var myfiles = JSON.parse(JSON.stringify(req.files))
         
-        
-
         myfiles.map((item: any) => {
             ids.push(item.filename)
         })
@@ -20,8 +18,7 @@ export class ProdutoController{
             ids[i] = ids[i].split('_',1)[0]
         }
 
-
-        const {
+        let {
             nome,           
             descricao,      
             dataCriacao,    
@@ -32,8 +29,10 @@ export class ProdutoController{
             largura,        
             comprimento,    
             material,
-            categoria,     
+            categoria,   
+            peso  
         } = req.body
+        peso = parseFloat(peso)
 
         const checkNome = await prisma.produto.findFirst({
             where:{
@@ -42,20 +41,21 @@ export class ProdutoController{
         })
         
         if(checkNome == null){
-            const produto = await prisma.produto.create({
+            await prisma.produto.create({
                 data:{
                     nome,           
                     descricao,      
                     dataCriacao,    
                     dataPublicacao,  
                     tipo,           
-                    valor: parseFloat(valor),          
+                    valor: parseFloat(valor),    
                     altura,         
                     largura,        
                     comprimento,    
                     material ,
                     categoria,
-                    imagens: ids
+                    imagens: ids,
+                    peso
                 },
             }).then((result) => {
                 resultStatus = 201
