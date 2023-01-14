@@ -3,6 +3,7 @@ import cors from "cors"
 import { routerUser } from "./src/Routes/UsuarioRoute";
 import { routerProduto } from "./src/Routes/ProdutoRoute";
 import path from 'path'
+import { routerCarrinho } from "./src/Routes/CarrinhoRoute";
 
 
 const app = express();
@@ -18,7 +19,8 @@ app.use("/static", express.static(path.resolve(__dirname, "public","uploads")))
 app.use(express.json());
 app.use(cors(corsOptions));
 app.use(routerUser);
-app.use(routerProduto)
+app.use(routerProduto);
+app.use(routerCarrinho);
 app.listen(3333, () => console.log('Server is running on port 3333'));
 
 
