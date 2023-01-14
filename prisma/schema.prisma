@@ -35,6 +35,7 @@ model Produto {
     dataPublicacao DateTime @default(now())
     tipo           String
     valor          Float
+    peso           Float
     altura         String
     largura        String
     comprimento    String
