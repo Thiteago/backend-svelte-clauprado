@@ -216,8 +216,6 @@ export class ProdutoController{
                     }
                 })
             })
-
-            
         })
 
         glob("public/uploads/*.png", function (er, files) {
