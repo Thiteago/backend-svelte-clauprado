@@ -28,18 +28,42 @@ model User {
 }
 
 model Produto {
-    id             Int      @id @default(autoincrement())
-    nome           String
-    descricao      String
-    dataCriacao    String
-    dataPublicacao DateTime @default(now())
-    tipo           String
-    valor          Float
-    peso           Float
-    altura         String
-    largura        String
-    comprimento    String
-    material       String
-    categoria      String
-    imagens        String[]
+    id                  Int      @id @default(autoincrement())
+    nome                String
+    descricao           String
+    dataCriacao         String
+    dataPublicacao      DateTime @default(now())
+    tipo                String
+    valor               Float
+    quantidadeEmEstoque Int      @default(1)
+    peso                Float
+    altura              String
+    largura             String
+    comprimento         String
+    material            String
+    categoria           String
+    imagens             String[]
+
+    vendas Venda[] @relation
+}
+
+model Venda {
+    id         Int      @id @default(autoincrement())
+    data_venda DateTime @default(now())
+    valor      Float
+
+    produtos Produto[] @relation
+
+    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id])
+    pagamentoId Int
+}
+
+model Pagamento {
+    id              Int      @id @default(autoincrement())
+    data_pagamento  DateTime @default(now())
+    valor           Float
+    forma_pagamento String
+    status          String
+
+    vendas Venda[]
 }
