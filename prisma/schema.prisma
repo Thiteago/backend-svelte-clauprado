@@ -25,6 +25,8 @@ model User {
     numeroTel      String
     numeroCel      String
     cargo          String @default("Usuario")
+
+    vendas Venda[]
 }
 
 model Produto {
@@ -54,8 +56,11 @@ model Venda {
 
     produtos Produto[] @relation
 
-    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id])
+    pagamento   Pagamento @relation(fields: [pagamentoId], references: [id])
     pagamentoId Int
+
+    user   User @relation(fields: [userId], references: [id])
+    userId Int
 }
 
 model Pagamento {
@@ -66,4 +71,16 @@ model Pagamento {
     status          String
 
     vendas Venda[]
+    boleto Boleto?
+}
+
+model Boleto {
+    id        Int      @id @default(autoincrement())
+    data_venc DateTime @default(now())
+    valor     Float
+    status    String
+    nomePDF   String
+
+    pagamento   Pagamento @relation(fields: [pagamentoId], references: [id])
+    pagamentoId Int       @unique
 }

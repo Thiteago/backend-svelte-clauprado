@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
+const pdf = require("html-pdf");
 var Boleto = require('node-boleto').Boleto;
+const time = new Date().getTime()
 
 export class PagamentoController {
   async geraBoleto(req: Request, res: Response) {
@@ -20,10 +22,13 @@ export class PagamentoController {
       'carteira': "102"
     });
 
-    
-   
-    return boleto.renderHTML(function (html) {
-      res.send(html)
+    boleto.renderHTML(function (html) {
+      pdf.create(html).toFile(`./src/boletos/boleto${time}.pdf`, function (err: any, res: any) {
+        if (err) return console.log(err);
+        console.log(res); // { filename: '/app/businesscard.pdf' }
+      });
     });
+    
+    return res.send('criado')
   }
 }
