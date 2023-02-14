@@ -1,13 +1,13 @@
 import { Router } from "express"
-import { PagamentoController } from "../Controller/PagamentoController";
+import { VendaController } from "../Controller/VendaController";
 
 
 
-const pagamentoController = new PagamentoController()
-export const routerPagamento = Router();
+const vendaController = new VendaController()
+export const routerVenda = Router();
 
 
-routerPagamento.get("/pagamento/boleto/:valor", pagamentoController.geraBoleto);
+routerVenda.post("/venda/gerar", vendaController.gerar);
 
 
 
