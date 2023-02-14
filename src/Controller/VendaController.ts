@@ -4,12 +4,19 @@ const pdf = require("html-pdf");
 var Boleto = require('node-boleto').Boleto;
 const time = new Date().getTime()
 
+interface IBoleto {
+  linhadigitavel: string,
+  barcode: string,
+  nomePDF: string
+}
+
 export class VendaController {
   async gerar(req: Request, res: Response) {
    let {total, cartItens, idUser, metodoPagamento} = req.body
 
     if(metodoPagamento === "boleto"){
-      let dataBoleto = await geraBoleto(total)
+      let dataBoleto: IBoleto = await geraBoleto(total)
+      dataBoleto.nomePDF = dataBoleto.nomePDF.substring(20, 33)
 
       const venda = await prisma.venda.create(
         {
@@ -41,6 +48,12 @@ export class VendaController {
           }
         }
       )
+      
+      if(!venda){ 
+        return res.status(400).json({message: "Erro ao gerar venda"})
+      }else{
+        return res.status(201).json({message: "Venda gerada com sucesso"})
+      }
     }
   }
 }
@@ -66,11 +79,8 @@ async function geraBoleto(valor: number){
     await boleto.renderHTML(async function (html: any) {
       await pdf.create(html).toFile(nomePDF, function (err: any, res: any) {
         if (err) return console.log(err);
-        console.log(res); // { filename: '/app/businesscard.pdf' }
       });
     });
-
-    console.log("nomepdf" + nomePDF)
 
     return {linhadigitavel: boleto.linha_digitavel, barcode: boleto.barcode_data, nomePDF: nomePDF}
 }
