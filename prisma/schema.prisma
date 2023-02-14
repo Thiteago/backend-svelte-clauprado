@@ -30,21 +30,25 @@ model User {
 }
 
 model Produto {
-    id                  Int      @id @default(autoincrement())
-    nome                String
-    descricao           String
-    dataCriacao         String
-    dataPublicacao      DateTime @default(now())
-    tipo                String
-    valor               Float
-    quantidadeEmEstoque Int      @default(1)
-    peso                Float
-    altura              String
-    largura             String
-    comprimento         String
-    material            String
-    categoria           String
-    imagens             String[]
+    id                   Int      @id @default(autoincrement())
+    nome                 String
+    descricao            String
+    dataCriacao          String
+    dataPublicacao       DateTime @default(now())
+    tipo                 String
+    data_disponibilidade DateTime
+    data_expiracao       DateTime
+    dias_alugados        Int      @default(0)
+    status_aluguel       String   @default("Disponivel")
+    valor                Float
+    quantidadeEmEstoque  Int      @default(1)
+    peso                 Float
+    altura               String
+    largura              String
+    comprimento          String
+    material             String
+    categoria            String
+    imagens              String[]
 
     vendas Venda[] @relation
 }

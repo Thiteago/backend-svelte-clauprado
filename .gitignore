@@ -7,7 +7,7 @@
 
 public/uploads
 
-/src/boletos
+/src/boletos/*
 
 # testing
 /coverage
