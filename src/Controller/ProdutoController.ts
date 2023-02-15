@@ -4,52 +4,75 @@ import glob from 'glob'
 
 
 export class ProdutoController{
-    async cadastrar (req: Request, res: Response){
-        let resultStatus = 201
-        let ids: Array<string> = [];
+  async cadastrar (req: Request, res: Response){
+      let resultStatus = 201
+      let ids: Array<string> = [];
 
-        var myfiles = JSON.parse(JSON.stringify(req.files))
-        
-        myfiles.map((item: any) => {
-            ids.push(item.filename)
-        })
+      var myfiles = JSON.parse(JSON.stringify(req.files))
+      
+      myfiles.map((item: any) => {
+          ids.push(item.filename)
+      })
 
-        for(var i = 0; i< ids.length; i++){
-            ids[i] = ids[i].split('_',1)[0]
-        }
+      for(var i = 0; i< ids.length; i++){
+          ids[i] = ids[i].split('_',1)[0]
+      }
 
-        let {
-            nome,           
-            descricao,      
-            dataCriacao,    
-            dataPublicacao,  
-            quantidade,
-            tipo,           
-            valor,          
-            altura,         
-            largura,        
-            comprimento,    
-            material,
-            categoria,   
-            peso  
-        } = req.body
-        peso = parseFloat(peso)
+      let {
+          nome,           
+          descricao,      
+          dataFabricacao,    
+          quantidade,
+          peso,
+          valor,
+          altura, 
+          largura, 
+          comprimento, 
+          material,
+          categoria, 
+          tipo,
+      } = req.body
+      peso = parseFloat(peso)
 
-        const checkNome = await prisma.produto.findFirst({
-            where:{
-              nome: nome
-            }
-        })
-        
-        if(checkNome == null){
-            await prisma.produto.create({
-                data:{
+
+      const checkNomeProduto = await prisma.produto.findFirst({
+          where:{
+            nome: nome
+          }
+      })
+
+      if(checkNomeProduto == null){
+          if(tipo != "Aluguel"){
+          await prisma.produto.create({
+              data:{
+                  nome,           
+                  descricao,      
+                  dataFabricacao: new Date(dataFabricacao),    
+                  quantidadeEmEstoque: parseInt(quantidade),        
+                  valor: parseFloat(valor),    
+                  altura,         
+                  largura,        
+                  comprimento,    
+                  material ,
+                  categoria,
+                  imagens: ids,
+                  peso,
+
+                  vendas: {
+                    create: {
+                    },     
+                  }
+                },
+          }).then((result) => {
+              resultStatus = 201
+          })
+          }else{
+              await prisma.produto.create({
+                  data:{
                     nome,           
                     descricao,      
-                    dataCriacao,    
-                    dataPublicacao,  
-                    quantidadeEmEstoque: parseInt(quantidade),
-                    tipo,           
+                    dataFabricacao: new Date(dataFabricacao),    
+                    quantidadeEmEstoque: parseInt(quantidade),        
                     valor: parseFloat(valor),    
                     altura,         
                     largura,        
@@ -57,69 +80,96 @@ export class ProdutoController{
                     material ,
                     categoria,
                     imagens: ids,
-                    peso
-                },
-            }).then((result) => {
-                resultStatus = 201
-            })
-        }else{
-            resultStatus = 500
-        }
+                    peso,
 
-        res.sendStatus(resultStatus)
-    }
+                    alugueis: {
+                        create: {
+                        }
+                  },
+              }).then((result) => {
+                  resultStatus = 201
+              })
+          }
+      }else{
+          resultStatus = 500
+      }
+      res.sendStatus(resultStatus)
+  }
     
-    async listar (req: Request, res: Response){
-        const produtos = await prisma.produto.findMany({
-            where:{
-                quantidadeEmEstoque: {
-                    gt: 0
-                }
-            }
-        })
-        return res.json(produtos)
+  async listar (req: Request, res: Response){
+      let produtosVenda = await prisma.produtoVenda.findMany({
+          where:{
+              quantidadeEmEstoque: {
+                  gt: 0
+              }
+          }
+      })
+
+      let produtosAluguel = await prisma.produtoAluguel.findMany({
+          where:{
+              quantidadeEmEstoque: {
+                  gt: 0
+              }
+          }
+      })
+
+      produtosVenda.tipo = "Venda"
+
+      const produtos = Object.assign(produtosAluguel, produtosVenda)
+
+      return res.json(produtos)
+  }
+
+  async alterar (req: Request, res: Response){
+    const idProduto = Number(req.params.id)
+    let ids: Array<string> = [];
+    let myfiles = JSON.parse(JSON.stringify(req.files))
+      
+      
+    myfiles.map((item: any) => {
+        ids.push(item.filename)
+    })
+
+    for(var i = 0; i< ids.length; i++){
+        ids[i] = ids[i].split('_',1)[0]
     }
 
-    async alterar (req: Request, res: Response){
-        const idProduto = Number(req.params.id)
-        let ids: Array<string> = [];
-        let myfiles = JSON.parse(JSON.stringify(req.files))
-        
-        
+    let {
+        nome,           
+        descricao,      
+        dataCriacao,     
+        quantidade,
+        tipo,
+        dataDisponibilidade,
+        dataExpiracao,        
+        status_aluguel,   
+        valor,          
+        altura,         
+        largura,        
+        comprimento,    
+        material,
+        categoria,   
+        peso  
+    } = req.body
+    peso = parseFloat(peso)
+  
 
-        myfiles.map((item: any) => {
-            ids.push(item.filename)
-        })
-
-        for(var i = 0; i< ids.length; i++){
-            ids[i] = ids[i].split('_',1)[0]
+    const checkNomeVenda = await prisma.produtoVenda.findFirst({
+        where:{
+          nome: nome
         }
+    })
 
-        const {
-            nome,
-            descricao,
-            dataCriacao,
-            quantidade,
-            tipo,
-            valor,
-            altura,
-            largura,
-            comprimento,
-            material,
-            categoria
-        } = req.body
-    
+    const checkNomeAluguel = await prisma.produtoAluguel.findFirst({
+        where:{
+            nome: nome
+        }
+    })
 
-        const checkNome = await prisma.produto.findFirst({
-            where:{
-              nome: nome
-            }
-        })
-
-
-        if(checkNome?.nome == null || checkNome.id == idProduto){
+    if(tipo != "Aluguel"){
+        if(checkNomeVenda?.nome == null || checkNomeVenda.id == idProduto){
             if(myfiles.length > 0){
-                await prisma.produto.update({
+                await prisma.produtoVenda.update({
                     where:{
                     id: idProduto
                     },
@@ -127,7 +177,6 @@ export class ProdutoController{
                         nome,
                         descricao,
                         dataCriacao,
-                        tipo,
                         valor: parseFloat(valor),
                         quantidadeEmEstoque: parseInt(quantidade),
                         altura,
@@ -140,30 +189,81 @@ export class ProdutoController{
                 })
                 return res.sendStatus(201)
             }else{
-							await prisma.produto.update({
-								where:{
-								id: idProduto
-								},
-								data:{
-										nome,
-										descricao,
-										dataCriacao,
-										tipo,
-										valor: parseFloat(valor),
-                                        quantidadeEmEstoque: parseInt(quantidade),
-										altura,
-										largura,
-										comprimento,
-										material,
-										categoria
-								}
-						})
-						return res.sendStatus(201)
-						}
-        }else{
-				return res.sendStatus(500)
-				}
+                await prisma.produtoVenda.update({
+                    where:{
+                    id: idProduto
+                    },
+                    data:{
+                        nome,
+                        descricao,
+                        dataCriacao,
+                        valor: parseFloat(valor),
+                        quantidadeEmEstoque: parseInt(quantidade),
+                        altura,
+                        largura,
+                        comprimento,
+                        material,
+                        categoria
+                    }
+                })
+                return res.sendStatus(201)
+            }
+        }
+    }else{
+      if(checkNomeAluguel?.nome == null || checkNomeAluguel.id == idProduto){
+          if(myfiles.length > 0){
+              await prisma.produtoAluguel.update({
+                  where:{
+                  id: idProduto
+                  },
+                  data:{
+                      nome,
+                      descricao,
+                      dataCriacao,
+                      data_disponibilidade: new Date(dataDisponibilidade),
+                      data_expiracao: new Date(dataExpiracao),
+                      status_aluguel: status_aluguel,
+                      valor: parseFloat(valor),
+                      quantidadeEmEstoque: parseInt(quantidade),
+                      peso,
+                      altura,
+                      largura,
+                      comprimento,
+                      material,
+                      categoria,
+                      imagens : ids
+                  }
+              })
+              return res.sendStatus(201)
+          }else{
+              await prisma.produtoAluguel.update({
+                  where:{
+                  id: idProduto
+                  },
+                  data:{
+                    nome,
+                    descricao,
+                    dataCriacao,
+                    data_disponibilidade: new Date(dataDisponibilidade),
+                    data_expiracao: new Date(dataExpiracao),
+                    status_aluguel: status_aluguel,
+                    valor: parseFloat(valor),
+                    quantidadeEmEstoque: parseInt(quantidade),
+                    peso,
+                    altura,
+                    largura,
+                    comprimento,
+                    material,
+                    categoria
+                  }
+              })
+              return res.sendStatus(201)
+          }
+      }else{
+    return res.sendStatus(500)
     }
+  }
+}
 
     async excluir (req: Request, res: Response){
         const idProduto = Number(req.params.id)

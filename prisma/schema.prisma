@@ -25,45 +25,53 @@ model User {
     numeroTel      String
     numeroCel      String
     cargo          String @default("Usuario")
-
-    vendas Venda[]
+    status         String @default("Ativo")
 }
 
 model Produto {
-    id                   Int      @id @default(autoincrement())
-    nome                 String
-    descricao            String
-    dataCriacao          String
-    dataPublicacao       DateTime @default(now())
-    tipo                 String
-    data_disponibilidade DateTime
-    data_expiracao       DateTime
-    dias_alugados        Int      @default(0)
-    status_aluguel       String   @default("Disponivel")
-    valor                Float
-    quantidadeEmEstoque  Int      @default(1)
-    peso                 Float
-    altura               String
-    largura              String
-    comprimento          String
-    material             String
-    categoria            String
-    imagens              String[]
+    id                  Int      @id @default(autoincrement())
+    nome                String
+    descricao           String
+    dataFabricacao      DateTime
+    dataPublicacao      DateTime @default(now())
+    quantidadeEmEstoque Int      @default(1)
+    peso                Float
+    valor               Float
+    altura              String
+    largura             String
+    comprimento         String
+    material            String
+    categoria           String
+    imagens             String[]
 
-    vendas Venda[] @relation
+    alugueis Aluguel[]
+    vendas   Venda[]
 }
 
-model Venda {
-    id         Int      @id @default(autoincrement())
-    data_venda DateTime @default(now())
+model Aluguel {
+    id                   Int       @id @default(autoincrement())
+    data_aluguel         DateTime?
+    data_disponibilidade DateTime  @default(now())
+    data_expiracao       DateTime?
+    status_aluguel       String    @default("Disponivel")
+    dias_alugados        Int       @default(0)
+    tipo                 String    @default("Aluguel")
 
-    produtos Produto[] @relation
+    produtos Produto[]
 
     pagamento   Pagamento @relation(fields: [pagamentoId], references: [id])
     pagamentoId Int
+}
 
-    user   User @relation(fields: [userId], references: [id])
-    userId Int
+model Venda {
+    id           Int       @id @default(autoincrement())
+    data_venda   DateTime?
+    tipo         String    @default("Venda")
+    status_venda String    @default("Disponivel")
+
+    produtos    Produto[]
+    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id])
+    pagamentoId Int?
 }
 
 model Pagamento {
@@ -73,8 +81,9 @@ model Pagamento {
     forma_pagamento String
     status          String   @default("Pendente")
 
-    vendas Venda[]
-    boleto Boleto?
+    alugueis Aluguel[]
+    vendas   Venda[]
+    boleto   Boleto?
 }
 
 model Boleto {
