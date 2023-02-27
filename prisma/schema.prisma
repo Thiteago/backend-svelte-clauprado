@@ -57,10 +57,9 @@ model Aluguel {
     dias_alugados        Int       @default(0)
     tipo                 String    @default("Aluguel")
 
-    produtos Produto[]
-
-    pagamento   Pagamento @relation(fields: [pagamentoId], references: [id])
-    pagamentoId Int
+    produtos    Produto[]
+    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id])
+    pagamentoId Int?
 }
 
 model Venda {

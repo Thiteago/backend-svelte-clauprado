@@ -5,119 +5,135 @@ import glob from 'glob'
 
 export class ProdutoController{
   async cadastrar (req: Request, res: Response){
-      let resultStatus = 201
-      let ids: Array<string> = [];
+    let ids: Array<string> = [];
+    var myfiles = JSON.parse(JSON.stringify(req.files))
+    
+    myfiles.map((item: any) => {
+      ids.push(item.filename)
+    })
 
-      var myfiles = JSON.parse(JSON.stringify(req.files))
-      
-      myfiles.map((item: any) => {
-          ids.push(item.filename)
-      })
+    for(var i = 0; i< ids.length; i++){
+      ids[i] = ids[i].split('_',1)[0]
+    }
 
-      for(var i = 0; i< ids.length; i++){
-          ids[i] = ids[i].split('_',1)[0]
+    let {
+      nome,           
+      descricao,      
+      dataFabricacao,    
+      quantidade,
+      peso,
+      valor,
+      data_disponibilidade,
+      altura, 
+      largura, 
+      comprimento, 
+      material,
+      categoria, 
+      tipo,
+    } = req.body
+    peso = parseFloat(peso)
+    valor = parseFloat(valor)
+
+
+    const checkNomeProduto = await prisma.produto.findFirst({
+      where:{
+        nome: nome
       }
+    })
 
-      let {
-          nome,           
-          descricao,      
-          dataFabricacao,    
-          quantidade,
-          peso,
-          valor,
-          altura, 
-          largura, 
-          comprimento, 
-          material,
-          categoria, 
-          tipo,
-      } = req.body
-      peso = parseFloat(peso)
-
-
-      const checkNomeProduto = await prisma.produto.findFirst({
-          where:{
-            nome: nome
-          }
-      })
-
-      if(checkNomeProduto == null){
-          if(tipo != "Aluguel"){
-          await prisma.produto.create({
-              data:{
-                  nome,           
-                  descricao,      
-                  dataFabricacao: new Date(dataFabricacao),    
-                  quantidadeEmEstoque: parseInt(quantidade),        
-                  valor: parseFloat(valor),    
-                  altura,         
-                  largura,        
-                  comprimento,    
-                  material ,
-                  categoria,
-                  imagens: ids,
-                  peso,
-
-                  vendas: {
-                    create: {
-                    },     
-                  }
-                },
-          }).then((result) => {
-              resultStatus = 201
-          })
-          }else{
-              await prisma.produto.create({
-                  data:{
-                    nome,           
-                    descricao,      
-                    dataFabricacao: new Date(dataFabricacao),    
-                    quantidadeEmEstoque: parseInt(quantidade),        
-                    valor: parseFloat(valor),    
-                    altura,         
-                    largura,        
-                    comprimento,    
-                    material ,
-                    categoria,
-                    imagens: ids,
-                    peso,
-
-                    alugueis: {
-                        create: {
-                        }
-                  },
-              }).then((result) => {
-                  resultStatus = 201
-              })
-          }
+    if(checkNomeProduto == null){
+      if(tipo != "Aluguel"){
+        await prisma.produto.create({
+          data:{
+            nome,           
+            descricao,      
+            dataFabricacao: new Date(dataFabricacao),    
+            quantidadeEmEstoque: parseInt(quantidade),        
+            valor: parseFloat(valor),    
+            altura,         
+            largura,        
+            comprimento,    
+            material ,
+            categoria,
+            imagens: ids,
+            peso,
+            vendas: {
+              create: {
+                tipo: "Venda",
+                status_venda: "Disponível",
+              } 
+            }
+          },
+        }).then(() => {
+          res.sendStatus(201)
+        })
       }else{
-          resultStatus = 500
+        await prisma.produto.create({
+          data:{
+            nome,           
+            descricao,      
+            dataFabricacao: new Date(dataFabricacao),    
+            quantidadeEmEstoque: parseInt(quantidade),        
+            valor: parseFloat(valor),    
+            altura,         
+            largura,        
+            comprimento,    
+            material ,
+            categoria,
+            imagens: ids,
+            peso,
+            alugueis: {
+              create: {
+                data_disponibilidade: data_disponibilidade,
+                status_aluguel: "Disponível",
+                tipo: "Aluguel",
+                dias_alugados: 0
+              }
+            },
+          }
+        }).then(() => {
+          res.sendStatus(201)
+        })
       }
-      res.sendStatus(resultStatus)
+    }else{
+      res.sendStatus(500)
+    }
   }
     
   async listar (req: Request, res: Response){
-      let produtosVenda = await prisma.produtoVenda.findMany({
-          where:{
-              quantidadeEmEstoque: {
-                  gt: 0
-              }
-          }
-      })
+    let produtosVenda = await prisma.produto.findMany({
+      where:{
+        quantidadeEmEstoque: {
+          gt: 0
+        },
+        vendas: {
+          some: {}
+        }
+      },
+      include:{
+        vendas: true,
+      }
+    })
 
-      let produtosAluguel = await prisma.produtoAluguel.findMany({
-          where:{
-              quantidadeEmEstoque: {
-                  gt: 0
-              }
-          }
-      })
+    const produtosAluguel = await prisma.produto.findMany({
+      where: {
+        quantidadeEmEstoque: {
+          gt: 0
+        },
+        alugueis: {
+          some: {}
+        }
+      },
+      include: {
+        alugueis: true
+      }
+    })
 
-      produtosVenda.tipo = "Venda"
+    const produtosSet = new Set([...produtosVenda, ...produtosAluguel])
+    const produtos = [...produtosSet]
 
-      const produtos = Object.assign(produtosAluguel, produtosVenda)
 
-      return res.json(produtos)
+    return res.json(produtos)
   }
 
   async alterar (req: Request, res: Response){
@@ -125,39 +141,38 @@ export class ProdutoController{
     let ids: Array<string> = [];
     let myfiles = JSON.parse(JSON.stringify(req.files))
       
-      
     myfiles.map((item: any) => {
-        ids.push(item.filename)
+      ids.push(item.filename)
     })
 
     for(var i = 0; i< ids.length; i++){
-        ids[i] = ids[i].split('_',1)[0]
+      ids[i] = ids[i].split('_',1)[0]
     }
 
     let {
-        nome,           
-        descricao,      
-        dataCriacao,     
-        quantidade,
-        tipo,
-        dataDisponibilidade,
-        dataExpiracao,        
-        status_aluguel,   
-        valor,          
-        altura,         
-        largura,        
-        comprimento,    
-        material,
-        categoria,   
-        peso  
+      nome,           
+      descricao,      
+      dataCriacao,     
+      quantidade,
+      tipo,
+      dataDisponibilidade,
+      dataExpiracao,        
+      status_aluguel,   
+      valor,          
+      altura,         
+      largura,        
+      comprimento,    
+      material,
+      categoria,   
+      peso  
     } = req.body
     peso = parseFloat(peso)
   
 
     const checkNomeVenda = await prisma.produtoVenda.findFirst({
-        where:{
-          nome: nome
-        }
+      where:{
+        nome: nome
+      }
     })
 
     const checkNomeAluguel = await prisma.produtoAluguel.findFirst({
@@ -265,84 +280,84 @@ export class ProdutoController{
   }
 }
 
-    async excluir (req: Request, res: Response){
-        const idProduto = Number(req.params.id)
+  async excluir (req: Request, res: Response){
+      const idProduto = Number(req.params.id)
 
-        await prisma.produto.delete({
+      await prisma.produto.delete({
           where:{
-            id: idProduto
+          id: idProduto
           }
-        })
+      })
 
-        res.sendStatus(201)
-    }
+      res.sendStatus(201)
+  }
 
-    async listarpeloid (req: Request, res: Response){
-        const idProduto = Number(req.params.id)
-        const produto = await prisma.produto.findUnique({
-            where: {
-                id: idProduto
-            }
-        })
-        return res.json(produto)
-    }
+  async listarpeloid (req: Request, res: Response){
+      const idProduto = Number(req.params.id)
+      const produto = await prisma.produto.findUnique({
+          where: {
+              id: idProduto
+          }
+      })
+      return res.json(produto)
+  }
 
-    async enviarPath (req: Request, res: Response){
-        const idProduto = Number(req.params.id)
-        const imagens: string[] = []
-        var caminhos: string[] = []
- 
-        const query = await prisma.produto.findMany({
-            where:{
-                id: idProduto
-            }
-        })
-        
+  async enviarPath (req: Request, res: Response){
+      const idProduto = Number(req.params.id)
+      const imagens: string[] = []
+      var caminhos: string[] = []
 
-        query.map((item) => {
-            item.imagens.map((element) => {
-                imagens.push(element)
-            })
-        })
+      const query = await prisma.produto.findMany({
+          where:{
+              id: idProduto
+          }
+      })
+      
 
-        
-        glob("public/uploads/*.jpg", function (er, files) : any {
+      query.map((item) => {
+          item.imagens.map((element) => {
+              imagens.push(element)
+          })
+      })
 
-            imagens.map((element) => {
-                files.map((item) => {
-                    if(item.includes(element)){
-                        caminhos.push(item)
-                    }
-                })
-            })
-        })
+      
+      glob("public/uploads/*.jpg", function (er, files) : any {
 
-        glob("public/uploads/*.jpeg", function (er, files) {
-            imagens.map((element) => {
-                files.map((item) => {
-                    if(item.includes(element)){
-                        caminhos.push(item)
-                    }
-                })
-            })
-        })
+          imagens.map((element) => {
+              files.map((item) => {
+                  if(item.includes(element)){
+                      caminhos.push(item)
+                  }
+              })
+          })
+      })
 
-        glob("public/uploads/*.png", function (er, files) {
-            imagens.map((element) => {
-                files.map((item) => {
-                    if(item.includes(element)){
-                        caminhos.push(item)
-                    }
-                })
-            })
+      glob("public/uploads/*.jpeg", function (er, files) {
+          imagens.map((element) => {
+              files.map((item) => {
+                  if(item.includes(element)){
+                      caminhos.push(item)
+                  }
+              })
+          })
+      })
 
-            caminhos.map((item, i) => {
-                caminhos[i] = item.replace('public/uploads/', '')
-            })
+      glob("public/uploads/*.png", function (er, files) {
+          imagens.map((element) => {
+              files.map((item) => {
+                  if(item.includes(element)){
+                      caminhos.push(item)
+                  }
+              })
+          })
 
-            res.json({caminhos})
-        })
-        
+          caminhos.map((item, i) => {
+              caminhos[i] = item.replace('public/uploads/', '')
+          })
 
-    }
+          res.json({caminhos})
+      })
+      
+
+  }
 }
