@@ -4,7 +4,7 @@ import { routerUser } from "./src/Routes/UsuarioRoute";
 import { routerProduto } from "./src/Routes/ProdutoRoute";
 import path from 'path'
 import { routerCarrinho } from "./src/Routes/CarrinhoRoute";
-import { routerPedido } from "./src/Routes/PedidoController";
+import { routerPedido } from "./src/Routes/PedidoRoute";
 
 
 const app = express();
