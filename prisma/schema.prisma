@@ -48,6 +48,7 @@ model Produto {
 
     Aluguel Aluguel?
     Venda   Venda?
+    Pedido  Pedido[]
 }
 
 model Aluguel {
@@ -81,6 +82,7 @@ model Pedido {
     user   User @relation(fields: [userId], references: [id])
     userId Int
 
+    produtos  Produto[]
     Pagamento Pagamento?
 }
 
