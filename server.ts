@@ -4,7 +4,7 @@ import { routerUser } from "./src/Routes/UsuarioRoute";
 import { routerProduto } from "./src/Routes/ProdutoRoute";
 import path from 'path'
 import { routerCarrinho } from "./src/Routes/CarrinhoRoute";
-import { routerVenda } from "./src/Routes/PagamentoRoute";
+import { routerPedido } from "./src/Routes/PedidoController";
 
 
 const app = express();
@@ -22,7 +22,7 @@ app.use(cors(corsOptions));
 app.use(routerUser);
 app.use(routerProduto);
 app.use(routerCarrinho);
-app.use(routerVenda)
+app.use(routerPedido)
 app.listen(3333, () => console.log('Server is running on port 3333'));
 
 

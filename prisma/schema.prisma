@@ -26,6 +26,8 @@ model User {
     numeroCel      String
     cargo          String @default("Usuario")
     status         String @default("Ativo")
+
+    pedidos Pedido[]
 }
 
 model Produto {
@@ -44,8 +46,8 @@ model Produto {
     categoria           String
     imagens             String[]
 
-    alugueis Aluguel[]
-    vendas   Venda[]
+    Aluguel Aluguel?
+    Venda   Venda?
 }
 
 model Aluguel {
@@ -57,37 +59,46 @@ model Aluguel {
     dias_alugados        Int       @default(0)
     tipo                 String    @default("Aluguel")
 
-    produtos    Produto[]
-    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id])
-    pagamentoId Int?
+    produto   Produto @relation(fields: [produtoId], references: [id])
+    produtoId Int     @unique
 }
 
 model Venda {
-    id           Int       @id @default(autoincrement())
-    data_venda   DateTime?
-    tipo         String    @default("Venda")
-    status_venda String    @default("Disponivel")
+    id           Int    @id @default(autoincrement())
+    tipo         String @default("Venda")
+    status_venda String @default("Disponivel")
 
-    produtos    Produto[]
-    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id])
-    pagamentoId Int?
+    produto   Produto @relation(fields: [produtoId], references: [id])
+    produtoId Int     @unique
+}
+
+model Pedido {
+    id          Int      @id @default(autoincrement())
+    data_pedido DateTime @default(now())
+    status      String   @default("Pendente")
+    valor       Float
+
+    user   User @relation(fields: [userId], references: [id])
+    userId Int
+
+    Pagamento Pagamento?
 }
 
 model Pagamento {
-    id              Int      @id @default(autoincrement())
-    data_pagamento  DateTime @default(now())
+    id              Int       @id @default(autoincrement())
+    data_pagamento  DateTime?
     valor           Float
     forma_pagamento String
-    status          String   @default("Pendente")
+    status          String    @default("Pendente")
 
-    alugueis Aluguel[]
-    vendas   Venda[]
+    pedido   Pedido  @relation(fields: [pedidoId], references: [id])
+    pedidoId Int     @unique
     boleto   Boleto?
 }
 
 model Boleto {
     id             Int      @id @default(autoincrement())
-    data_venc      DateTime @default(now())
+    data_venc      DateTime
     valor          Float
     status         String   @default("Pendente")
     linhaDigitavel String

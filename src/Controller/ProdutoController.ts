@@ -57,11 +57,11 @@ export class ProdutoController{
             categoria,
             imagens: ids,
             peso,
-            vendas: {
+            Venda: {
               create: {
                 tipo: "Venda",
-                status_venda: "Disponível",
-              } 
+                status_venda: "Disponível"
+              }
             }
           },
         }).then(() => {
@@ -82,14 +82,14 @@ export class ProdutoController{
             categoria,
             imagens: ids,
             peso,
-            alugueis: {
+            Aluguel: {
               create: {
                 data_disponibilidade: data_disponibilidade,
                 status_aluguel: "Disponível",
-                tipo: "Aluguel",
-                dias_alugados: 0
+                dias_alugados: 0,
+                tipo: "Aluguel"
               }
-            },
+            }
           }
         }).then(() => {
           res.sendStatus(201)
@@ -101,37 +101,17 @@ export class ProdutoController{
   }
     
   async listar (req: Request, res: Response){
-    let produtosVenda = await prisma.produto.findMany({
+    let produtos = await prisma.produto.findMany({
       where:{
         quantidadeEmEstoque: {
           gt: 0
         },
-        vendas: {
-          some: {}
-        }
       },
       include:{
-        vendas: true,
+        Venda: true,
+        Aluguel: true
       }
     })
-
-    const produtosAluguel = await prisma.produto.findMany({
-      where: {
-        quantidadeEmEstoque: {
-          gt: 0
-        },
-        alugueis: {
-          some: {}
-        }
-      },
-      include: {
-        alugueis: true
-      }
-    })
-
-    const produtosSet = new Set([...produtosVenda, ...produtosAluguel])
-    const produtos = [...produtosSet]
-
 
     return res.json(produtos)
   }
@@ -293,71 +273,73 @@ export class ProdutoController{
   }
 
   async listarpeloid (req: Request, res: Response){
-      const idProduto = Number(req.params.id)
-      const produto = await prisma.produto.findUnique({
-          where: {
-              id: idProduto
-          }
-      })
-      return res.json(produto)
+    const idProduto = Number(req.params.id)
+    const produto = await prisma.produto.findUnique({
+        where: {
+          id: idProduto
+        },
+        include: {
+          Venda: true,
+          Aluguel: true
+        }
+    })
+    return res.json(produto)
   }
 
   async enviarPath (req: Request, res: Response){
-      const idProduto = Number(req.params.id)
-      const imagens: string[] = []
-      var caminhos: string[] = []
+    const idProduto = Number(req.params.id)
+    const imagens: string[] = []
+    var caminhos: string[] = []
 
-      const query = await prisma.produto.findMany({
-          where:{
-              id: idProduto
-          }
-      })
-      
+    const query = await prisma.produto.findMany({
+      where:{
+        id: idProduto
+      }
+    })
+    
 
-      query.map((item) => {
-          item.imagens.map((element) => {
-              imagens.push(element)
-          })
-      })
+    query.map((item) => {
+        item.imagens.map((element) => {
+            imagens.push(element)
+        })
+    })
 
-      
-      glob("public/uploads/*.jpg", function (er, files) : any {
+    
+    glob("public/uploads/*.jpg", function (er, files) : any {
 
-          imagens.map((element) => {
-              files.map((item) => {
-                  if(item.includes(element)){
-                      caminhos.push(item)
-                  }
-              })
-          })
-      })
+        imagens.map((element) => {
+            files.map((item) => {
+                if(item.includes(element)){
+                    caminhos.push(item)
+                }
+            })
+        })
+    })
 
-      glob("public/uploads/*.jpeg", function (er, files) {
-          imagens.map((element) => {
-              files.map((item) => {
-                  if(item.includes(element)){
-                      caminhos.push(item)
-                  }
-              })
-          })
-      })
+    glob("public/uploads/*.jpeg", function (er, files) {
+        imagens.map((element) => {
+            files.map((item) => {
+                if(item.includes(element)){
+                    caminhos.push(item)
+                }
+            })
+        })
+    })
 
-      glob("public/uploads/*.png", function (er, files) {
-          imagens.map((element) => {
-              files.map((item) => {
-                  if(item.includes(element)){
-                      caminhos.push(item)
-                  }
-              })
-          })
+    glob("public/uploads/*.png", function (er, files) {
+        imagens.map((element) => {
+            files.map((item) => {
+                if(item.includes(element)){
+                    caminhos.push(item)
+                }
+            })
+        })
 
-          caminhos.map((item, i) => {
-              caminhos[i] = item.replace('public/uploads/', '')
-          })
+        caminhos.map((item, i) => {
+            caminhos[i] = item.replace('public/uploads/', '')
+        })
 
-          res.json({caminhos})
-      })
-      
-
+        res.json({caminhos})
+    })
   }
 }
