@@ -21,37 +21,33 @@ export class PedidoController {
       let dataBoleto: IBoleto = await geraBoleto(total)
       dataBoleto.nomePDF = dataBoleto.nomePDF.substring(20, 33)
 
-      console.log(dataBoleto)
-
-      const itensVendas = cartItens.map(element => {
-        if(element.vendas.length > 0){
-          return element.vendas.map((item: any) => {
-            return item.id
-          })
+      let itensVendas = cartItens.map(element => {
+        if(element.Venda != null){
+          return element.Venda.produtoId
         }
       });
 
-      const itensAlugados = cartItens.map(element => {
-        if(element.alugueis.length > 0){
-          return element.alugueis.map((item: any) => {
-            return item.id
-          })
+      let itensAlugados = cartItens.filter(element => {
+        if(element.Aluguel != null || element.Aluguel != undefined){
+          return element.Aluguel.produtoId
         }
       });
 
-      console.table(itensVendas, itensAlugados)
+      let itens = [itensVendas, itensAlugados]
 
-      if(itensVendas.length > 0){
-        vendas = await prisma.venda.create({
+      console.log(itens)
+
+      if(itens.length > 0){
+        await prisma.pedido.create({
           data: {
-            data_venda: today,
-
-            user: {
-              connect: {
-                id: idUser
-              }
+            valor: total,
+            userId: idUser,
+            
+            produtos: {
+              connect: itens.map(id => ({ id })),
             },
-            pagamento: {
+
+            Pagamento: {
               create: {
                 valor: total,
                 forma_pagamento: metodoPagamento,
@@ -69,11 +65,18 @@ export class PedidoController {
             }
           }
         })
-        if(vendas != null){
-          res.status(201).json("Venda realizada com sucesso!")
-        }else{
-          res.status(400).json("Erro ao realizar a venda!")
-        }
+        await prisma.produto.updateMany({
+          where: {
+            id: {
+              in: itensVendas
+            }
+          },
+          data: {
+            quantidadeEmEstoque: {
+              decrement: 1
+            }
+          }
+        })
       }
     }
   }
