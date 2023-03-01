@@ -13,6 +13,7 @@ routerUser.get('/Usuarios', AuthMiddleware ,usuariocontroller.listar);
 routerUser.post("/Autenticar", authcontroller.authenticate)
 routerUser.get('/Usuarios/:id/dados', usuariocontroller.mostrarInfo)
 routerUser.patch('/Usuarios/:id/Alterar', usuariocontroller.alterarUser)
+routerUser.get('/Usuarios/:id/Enderecos', usuariocontroller.listarEnderecos)
 
 
 

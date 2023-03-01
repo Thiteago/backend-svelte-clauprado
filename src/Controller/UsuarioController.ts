@@ -34,14 +34,20 @@ export class UsuarioController {
         email,
         senha: hash_password,
         cpf,
-        rua,
-        numeroRua,
-        bairro,
-        cidade,
-        cep,
         numeroTel,
         numeroCel,
-        cargo: "Usuario"
+        cargo: "Usuario",
+
+        enderecos: {
+          create: {
+            rua,
+            numeroRua,
+            bairro,
+            cidade,
+            cep,
+            principal: true
+          }
+        }
       },
     });
 
@@ -96,5 +102,17 @@ export class UsuarioController {
     }else{
       return res.status(401).json({error: "Email ja esta sendo utilizado por outro usuário"})
     }
+  }
+
+  async listarEnderecos(req: Request, res: Response){
+    const idPerson = Number(req.params.id)
+
+    const enderecos = await prisma.endereco.findMany({
+      where: {
+        userId: idPerson
+      }
+    })
+
+    return res.json(enderecos)
   }
 }
