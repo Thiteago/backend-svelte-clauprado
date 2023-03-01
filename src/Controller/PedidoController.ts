@@ -14,28 +14,22 @@ interface IBoleto {
 
 export class PedidoController {
   async gerar(req: Request, res: Response) {
-    let today = new Date();
     let {total, cartItens, idUser, metodoPagamento} = req.body
 
     if(metodoPagamento === "boleto"){
       let dataBoleto: IBoleto = await geraBoleto(total)
       dataBoleto.nomePDF = dataBoleto.nomePDF.substring(20, 33)
 
-      let itensVendas = cartItens.map(element => {
+      let itens = cartItens.flatMap(element => {
+        let itensList = []
         if(element.Venda != null){
-          return element.Venda.produtoId
+          itensList.push(element.Venda.produtoId)
         }
-      });
-
-      let itensAlugados = cartItens.filter(element => {
-        if(element.Aluguel != null || element.Aluguel != undefined){
-          return element.Aluguel.produtoId
+        if(element.Aluguel != null){
+          itensList.push(element.Aluguel.produtoId)
         }
+        return itensList
       });
-
-      let itens = [itensVendas, itensAlugados]
-
-      console.log(itens)
 
       if(itens.length > 0){
         await prisma.pedido.create({
@@ -68,7 +62,7 @@ export class PedidoController {
         await prisma.produto.updateMany({
           where: {
             id: {
-              in: itensVendas
+              in: itens
             }
           },
           data: {
@@ -77,6 +71,9 @@ export class PedidoController {
             }
           }
         })
+        res.status(200).json({message: "Pedido gerado com sucesso"})
+      }else{
+        res.status(400).json({message: "Erro ao gerar pedido"})
       }
     }
   }
@@ -84,14 +81,21 @@ export class PedidoController {
   async listarPeloId(req: Request, res: Response){
     const {id} = req.params
 
-    const compras = await prisma.venda.findMany({
+    const pedidos = await prisma.pedido.findMany({
       where: {
         userId: Number(id)
       },
       include: {
-        pagamento: true
+        Pagamento: true,
+        produtos: true
       }
     })
+
+    if(pedidos.length > 0){
+      res.status(200).json(pedidos)
+    }else{
+      res.status(400).json({message: "Nenhum pedido encontrado"})
+    }
   }
 }
 async function geraBoleto(valor: number){
