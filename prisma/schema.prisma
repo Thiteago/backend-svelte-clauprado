@@ -16,18 +16,28 @@ model User {
     dataNascimento String
     email          String @unique
     senha          String
-    cpf            String
-    rua            String
-    numeroRua      String
-    bairro         String
-    cidade         String
-    cep            String
+    cpf            String @unique
     numeroTel      String
     numeroCel      String
     cargo          String @default("Usuario")
     status         String @default("Ativo")
 
-    pedidos Pedido[]
+    pedidos   Pedido[]
+    enderecos Endereco[]
+}
+
+model Endereco {
+    id        Int     @id @default(autoincrement())
+    rua       String
+    numeroRua String
+    bairro    String
+    cidade    String
+    cep       String
+    estado    String
+    principal Boolean @default(false)
+
+    user   User @relation(fields: [userId], references: [id])
+    userId Int
 }
 
 model Produto {
