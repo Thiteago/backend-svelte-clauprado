@@ -14,6 +14,7 @@ export class UsuarioController {
       numeroRua,
       bairro,
       cidade,
+      estado,
       cep,
       numeroTel,
       numeroCel,
@@ -45,6 +46,7 @@ export class UsuarioController {
             bairro,
             cidade,
             cep,
+            estado,
             principal: true
           }
         }
