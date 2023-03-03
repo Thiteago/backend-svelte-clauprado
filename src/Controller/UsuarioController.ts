@@ -117,4 +117,93 @@ export class UsuarioController {
 
     return res.json(enderecos)
   }
+
+  async cadastrarNovoEndereco(req: Request, res: Response){
+    const idPerson = Number(req.params.id)
+
+    const {rua, numeroRua, bairro, cidade, estado, cep, principal} = req.body
+
+    if(principal == true){
+      await prisma.endereco.updateMany({
+        where: {
+          userId: idPerson
+        },
+        data:{
+          principal: false
+        }
+      })
+    }
+
+    const endereco = await prisma.endereco.create({
+      data: {
+        rua,
+        numeroRua,
+        bairro,
+        cidade,
+        estado,
+        cep,
+        principal: principal,
+        userId: idPerson
+      }
+    })
+
+    if(endereco){
+      return res.status(201).json({message: "Endereço cadastrado com sucesso"})
+    }else{
+      return res.status(401).json({error: "Erro ao cadastrar endereço"})
+    }
+  }
+
+  async atualizarEndereco(req: Request, res: Response){
+    const idPerson = Number(req.params.id)
+    const {rua, numeroRua, bairro, cidade, estado, cep, principal, idEndereco} = req.body
+    let endereco = null
+
+    if(principal == true){
+      await prisma.endereco.updateMany({
+        where: {
+          userId: idPerson
+        },
+        data:{
+          principal: false
+        }
+      })
+      
+      endereco = await prisma.endereco.update({
+        where: {
+          id: idEndereco
+        },
+        data:{
+          rua,
+          numeroRua,
+          bairro,
+          cidade,
+          estado,
+          cep,
+          principal: principal
+        }
+      })
+    }else{
+      endereco = await prisma.endereco.update({
+        where: {
+          id: idEndereco
+        },
+        data:{
+          rua,
+          numeroRua,
+          bairro,
+          cidade,
+          estado,
+          cep,
+          principal: principal
+        }
+      })
+    }
+
+    if(endereco != null){
+      return res.status(201).json({message: "Endereço atualizado com sucesso"})
+    }else{
+      return res.status(401).json({error: "Erro ao atualizar endereço"})
+    }
+  }
 }

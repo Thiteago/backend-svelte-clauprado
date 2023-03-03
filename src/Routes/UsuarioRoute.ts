@@ -14,6 +14,8 @@ routerUser.post("/Autenticar", authcontroller.authenticate)
 routerUser.get('/Usuarios/:id/dados', usuariocontroller.mostrarInfo)
 routerUser.patch('/Usuarios/:id/Alterar', usuariocontroller.alterarUser)
 routerUser.get('/Usuarios/:id/Enderecos', usuariocontroller.listarEnderecos)
+routerUser.post('/Usuarios/:id/NovoEndereco', usuariocontroller.cadastrarNovoEndereco)
+routerUser.patch('/Usuarios/:id/AtualizarEndereco', usuariocontroller.atualizarEndereco)
 
 
 
