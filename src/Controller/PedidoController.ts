@@ -14,7 +14,7 @@ interface IBoleto {
 
 export class PedidoController {
   async gerar(req: Request, res: Response) {
-    let {total, cartItens, idUser, metodoPagamento} = req.body
+    let {total,frete, cartItens, idUser, metodoPagamento, endereco} = req.body
 
     if(metodoPagamento === "boleto"){
       let dataBoleto: IBoleto = await geraBoleto(total)
@@ -36,6 +36,8 @@ export class PedidoController {
           data: {
             valor: total,
             userId: idUser,
+            enderecoId: endereco.id,
+            valorFrete: frete,
             
             produtos: {
               connect: itens.map(id => ({ id })),
@@ -87,6 +89,7 @@ export class PedidoController {
       },
       include: {
         Pagamento: true,
+        endereco: true,
         produtos: true
       }
     })
