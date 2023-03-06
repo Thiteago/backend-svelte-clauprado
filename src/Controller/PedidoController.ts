@@ -14,7 +14,16 @@ interface IBoleto {
 
 export class PedidoController {
   async gerar(req: Request, res: Response) {
-    let {total,frete, cartItens, idUser, metodoPagamento, endereco} = req.body
+    let {total,
+      tipo_frete,
+      valor_frete,
+      cartItens, 
+      idUser,
+      metodoPagamento,
+      endereco,
+    } = req.body
+
+    valor_frete = parseFloat(valor_frete)
 
     if(metodoPagamento === "boleto"){
       let dataBoleto: IBoleto = await geraBoleto(total)
@@ -37,7 +46,8 @@ export class PedidoController {
             valor: total,
             userId: idUser,
             enderecoId: endereco.id,
-            valorFrete: frete,
+            tipo_frete,
+            valor_frete,
             
             produtos: {
               connect: itens.map(id => ({ id })),
@@ -61,6 +71,7 @@ export class PedidoController {
             }
           }
         })
+
         await prisma.produto.updateMany({
           where: {
             id: {
@@ -70,7 +81,7 @@ export class PedidoController {
           data: {
             quantidadeEmEstoque: {
               decrement: 1
-            }
+            },
           }
         })
         res.status(200).json({message: "Pedido gerado com sucesso"})
