@@ -113,6 +113,7 @@ model Pagamento {
     pedido   Pedido  @relation(fields: [pedidoId], references: [id])
     pedidoId Int     @unique
     boleto   Boleto?
+    cartao   Cartao?
 }
 
 model Boleto {
@@ -123,6 +124,19 @@ model Boleto {
     linhaDigitavel String
     numeroBoleto   String
     nomePDF        String
+
+    pagamento   Pagamento @relation(fields: [pagamentoId], references: [id])
+    pagamentoId Int       @unique
+}
+
+model Cartao {
+    id          Int      @id @default(autoincrement())
+    numero      String
+    nome        String
+    validade    String
+    bandeira    String
+    status      String   @default("Pendente")
+    data_criado DateTime @default(now())
 
     pagamento   Pagamento @relation(fields: [pagamentoId], references: [id])
     pagamentoId Int       @unique
