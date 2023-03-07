@@ -102,11 +102,6 @@ export class ProdutoController{
     
   async listar (req: Request, res: Response){
     let produtos = await prisma.produto.findMany({
-      where:{
-        quantidadeEmEstoque: {
-          gt: 0
-        },
-      },
       include:{
         Venda: true,
         Aluguel: true
