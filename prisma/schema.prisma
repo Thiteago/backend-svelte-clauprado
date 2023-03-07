@@ -58,9 +58,23 @@ model Produto {
     categoria           String
     imagens             String[]
 
-    Aluguel Aluguel?
-    Venda   Venda?
-    Pedido  Pedido[]
+    Aluguel    Aluguel?
+    Venda      Venda?
+    Pedido     Pedido[]
+    promocao   Promocao? @relation(fields: [promocaoId], references: [id])
+    promocaoId Int?
+}
+
+model Promocao {
+    id             Int      @id @default(autoincrement())
+    data_inicio    DateTime @default(now())
+    data_fim       DateTime
+    tipo_desconto  String
+    valor_desconto Float
+    tipo           String   @default("Desconto")
+    status         String   @default("Ativo")
+
+    produtos Produto[]
 }
 
 model Aluguel {
