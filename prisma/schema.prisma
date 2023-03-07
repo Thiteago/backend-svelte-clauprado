@@ -109,6 +109,7 @@ model Pagamento {
     valor           Float
     forma_pagamento String
     status          String    @default("Pendente")
+    vezes           String    @default("A vista")
 
     pedido   Pedido  @relation(fields: [pedidoId], references: [id])
     pedidoId Int     @unique
@@ -135,9 +136,8 @@ model Cartao {
     nome        String
     validade    String
     bandeira    String
-    status      String   @default("Pendente")
     data_criado DateTime @default(now())
 
-    pagamento   Pagamento @relation(fields: [pagamentoId], references: [id])
-    pagamentoId Int       @unique
+    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id])
+    pagamentoId Int        @unique
 }
