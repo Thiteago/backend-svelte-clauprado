@@ -27,6 +27,8 @@ export class PedidoController {
       idUser,
       metodoPagamento,
       endereco,
+      cartao,
+      vezes
     } = req.body
     let produtosAlugados = cartItens.filter((element: any) => element.Aluguel != null)
     let produtosVendidos = cartItens.filter((element: any) => element.Venda != null)
@@ -63,6 +65,66 @@ export class PedidoController {
           status_venda: produtosVendidos[0].quantidadeEmEstoque > 0 ? "Disponível" : "Indisponível",
         }
       })
+    }
+
+    if(metodoPagamento === "cartao"){
+      let itens = cartItens.flatMap(element => {
+        let itensList = []
+        if(element.Venda != null){
+          itensList.push(element.Venda.produtoId)
+        }
+        if(element.Aluguel != null){
+          itensList.push(element.Aluguel.produtoId)
+        }
+        return itensList
+      });
+
+      if(itens.length > 0){
+        await prisma.pedido.create({
+          data: {
+            valor: total,
+            userId: idUser,
+            enderecoId: endereco.id,
+            tipo_frete,
+            valor_frete,
+            
+            produtos: {
+              connect: itens.map(id => ({ id })),
+            },
+
+            Pagamento: {
+              create: {
+                valor: total,
+                vezes,
+                forma_pagamento: metodoPagamento,
+
+                cartao: {
+                  create: {
+                    numero: cartao.numero,
+                    nome: cartao.nome,
+                    validade: cartao.validade,
+                    bandeira: cartao.bandeira
+                  }
+                }
+              }
+            }
+          }
+        })
+
+        await prisma.produto.updateMany({
+          where: {
+            id: {
+              in: itens
+            }
+          },
+          data: {
+            quantidadeEmEstoque: {
+              decrement: 1
+            },
+          }
+        })
+        res.status(200).json({message: "Pedido gerado com sucesso"})
+      }
     }
 
      if(metodoPagamento === "boleto"){
@@ -141,7 +203,8 @@ export class PedidoController {
       include: {
         Pagamento: {
           include: {
-            boleto: true
+            boleto: true,
+            cartao: true
           }
         },
         endereco: true,
