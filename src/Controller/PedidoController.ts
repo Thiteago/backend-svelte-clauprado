@@ -12,6 +12,12 @@ interface IBoleto {
   nomePDF: string
 }
 
+function formatDate(date){
+  let data = new Date(date)
+  let formatedDate = new Date(data.getTime() - data.getTimezoneOffset() * -60000)
+  return formatedDate
+}
+
 export class PedidoController {
   async gerar(req: Request, res: Response) {
     let {total,
@@ -22,10 +28,44 @@ export class PedidoController {
       metodoPagamento,
       endereco,
     } = req.body
+    let produtosAlugados = cartItens.filter((element: any) => element.Aluguel != null)
+    let produtosVendidos = cartItens.filter((element: any) => element.Venda != null)
+    
 
     valor_frete = parseFloat(valor_frete)
 
-    if(metodoPagamento === "boleto"){
+
+    if(produtosAlugados.length > 0) {
+      await prisma.aluguel.updateMany({
+        where: {
+          id: {
+            in: produtosAlugados.map((element: any) => element.Aluguel.id)
+          }
+        },
+        data: {
+          data_aluguel: formatDate(produtosAlugados[0].Aluguel.data_aluguel),
+          data_disponibilidade: formatDate(produtosAlugados[0].Aluguel.data_disponibilidade),
+          data_expiracao:formatDate(produtosAlugados[0].Aluguel.data_expiracao),
+          status_aluguel: produtosAlugados[0].quantidadeEmEstoque > 0 ? "Disponível" : "Indisponível",
+          dias_alugados: produtosAlugados[0].Aluguel.dias_alugados,
+        }
+      })
+    }
+
+    if(produtosVendidos.length > 0){
+      await prisma.venda.updateMany({
+        where: {
+          id: {
+            in: produtosVendidos.map((element: any) => element.Venda.id)
+          }
+        },
+        data: {
+          status_venda: produtosVendidos[0].quantidadeEmEstoque > 0 ? "Disponível" : "Indisponível",
+        }
+      })
+    }
+
+     if(metodoPagamento === "boleto"){
       let dataBoleto: IBoleto = await geraBoleto(total)
       dataBoleto.nomePDF = dataBoleto.nomePDF.substring(20, 33)
 
@@ -99,7 +139,11 @@ export class PedidoController {
         userId: Number(id)
       },
       include: {
-        Pagamento: true,
+        Pagamento: {
+          include: {
+            boleto: true
+          }
+        },
         endereco: true,
         produtos: true
       }
