@@ -1,10 +1,4 @@
 import { Request, Response } from "express";
-import { prisma } from "../utils/prisma";
-
-
-
-
-
 
 export class CarrinhoController {
   async calcularFrete(req: Request, res: Response) {
