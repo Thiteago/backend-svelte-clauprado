@@ -67,9 +67,9 @@ model Produto {
 
 model Promocao {
     id             Int      @id @default(autoincrement())
+    nome           String
     data_inicio    DateTime @default(now())
     data_fim       DateTime
-    tipo_desconto  String
     valor_desconto Float
     tipo           String   @default("Desconto")
     status         String   @default("Ativo")
