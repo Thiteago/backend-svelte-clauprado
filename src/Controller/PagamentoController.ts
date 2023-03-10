@@ -18,7 +18,12 @@ export class PagamentoController {
       return res.status(404).json({message: 'Pagamento não encontrado'})
     }
 
-    const boletoPath = `/git/backend/src/boletos/boleto${pagamento.boleto?.nomePDF}.pdf`
-    res.sendFile(boletoPath)
+    const boletoPath = `boletos/boleto${pagamento.boleto?.nomePDF}.pdf`
+    res.sendFile(boletoPath, { root: 'src/' }, (err) => {
+      if (err) {
+        console.error(err);
+        res.status(403).send('Access denied: you do not have permission to access this resource');
+      }
+    });
   }
 }
