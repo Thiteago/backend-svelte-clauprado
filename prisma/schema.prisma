@@ -70,8 +70,9 @@ model Promocao {
     nome           String
     data_inicio    DateTime @default(now())
     data_fim       DateTime
+    categorias     String[]
     valor_desconto Float
-    tipo           String   @default("Desconto")
+    tipo           String   @default("porcentual")
     status         String   @default("Ativo")
 
     produtos Produto[]
