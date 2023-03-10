@@ -104,7 +104,8 @@ export class ProdutoController{
     let produtos = await prisma.produto.findMany({
       include:{
         Venda: true,
-        Aluguel: true
+        Aluguel: true,
+        promocao: true
       }
     })
 
@@ -275,7 +276,8 @@ export class ProdutoController{
         },
         include: {
           Venda: true,
-          Aluguel: true
+          Aluguel: true,
+          promocao: true
         }
     })
     return res.json(produto)
