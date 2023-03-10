@@ -42,6 +42,7 @@ export class PromocaoController {
         data_inicio: new Date(data_inicio),
         data_fim: new Date(data_fim),
         tipo,
+        categorias,
         valor_desconto,
         produtos: {
           connect: produtosPorId.map(id => ({ id: Number(id) }))
@@ -56,10 +57,32 @@ export class PromocaoController {
   }
 
   async listar(req: Request ,res: Response) {
-    const promocoes = await prisma.promocao.findMany();
+    const promocoes = await prisma.promocao.findMany(
+      {
+        include: {
+          produtos: true
+        }
+      }
+    );
     if(!promocoes || promocoes.length === 0) {
       return res.status(400).json({error: 'Erro ao listar promoções'})
     } 
     return res.json(promocoes)
+  }
+
+  async desabilitar(req: Request, res: Response) {
+    const id = Number(req.params.id)
+    const promocao = await prisma.promocao.update({
+      where: {
+        id
+      },
+      data: {
+        status: "Inativo"
+      }
+    })
+    if(!promocao) {
+      return res.status(400).json({error: 'Erro ao desabilitar promoção'})
+    }
+    return res.status(200).json(promocao)
   }
 }
