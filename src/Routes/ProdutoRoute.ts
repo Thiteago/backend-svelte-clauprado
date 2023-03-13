@@ -15,7 +15,6 @@ routerProduto.get("/Produto", produtocontroller.listar);
 routerProduto.get("/Produto/:id", produtocontroller.listarpeloid)
 routerProduto.patch("/Produto/:id/Alterar",upload.array('imagens', 4), produtocontroller.alterar)
 routerProduto.delete("/Produto/:id/Deletar", produtocontroller.excluir)
-routerProduto.get("/Produto/ImagePath/:id", produtocontroller.enviarPath)
 
 
 
