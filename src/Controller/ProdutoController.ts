@@ -101,7 +101,7 @@ export class ProdutoController{
   }
     
   async listar (req: Request, res: Response){
-    let produtos = await prisma.produto.findMany({
+    let produtos: any = await prisma.produto.findMany({
       include:{
         Venda: true,
         Aluguel: true,
@@ -109,6 +109,12 @@ export class ProdutoController{
       }
     })
 
+    produtos = produtos.map(async(produto: any) => {
+      produto = {...produto, caminhos: await enviarPath(produto.id)}
+      return produto
+    })
+    
+    produtos = await Promise.all(produtos)
     return res.json(produtos)
   }
 
@@ -270,7 +276,7 @@ export class ProdutoController{
 
   async listarpeloid (req: Request, res: Response){
     const idProduto = Number(req.params.id)
-    const produto = await prisma.produto.findUnique({
+    let produto:  any = await prisma.produto.findUnique({
         where: {
           id: idProduto
         },
@@ -280,63 +286,57 @@ export class ProdutoController{
           promocao: true
         }
     })
+
+    produto = {...produto, caminhos: await enviarPath(produto.id)}
+  
     return res.json(produto)
   }
+}
 
-  async enviarPath (req: Request, res: Response){
-    const idProduto = Number(req.params.id)
-    const imagens: string[] = []
-    var caminhos: string[] = []
+async function enviarPath(id) {
+  const imagens: string[] = [];
+  const caminhos: any[] = [];
 
-    const query = await prisma.produto.findMany({
-      where:{
-        id: idProduto
-      }
-    })
-    
+  const query = await prisma.produto.findMany({
+    where: {
+      id: id,
+    },
+  });
 
-    query.map((item) => {
-        item.imagens.map((element) => {
-            imagens.push(element)
-        })
-    })
+  query.forEach((item) => {
+    item.imagens.forEach((element) => {
+      imagens.push(element);
+    });
+  });
 
-    
-    glob("public/uploads/*.jpg", function (er, files) : any {
+  const extensions = ["jpg", "jpeg", "png"];
+  const promises: any[] = [];
 
-        imagens.map((element) => {
-            files.map((item) => {
-                if(item.includes(element)){
-                    caminhos.push(item)
-                }
-            })
-        })
-    })
+  extensions.forEach((extension) => {
+    promises.push(
+      new Promise<void>((resolve, reject) => {
+        glob(`public/uploads/*.${extension}`, (err, files) => {
+          if (err) reject(err);
 
-    glob("public/uploads/*.jpeg", function (er, files) {
-        imagens.map((element) => {
-            files.map((item) => {
-                if(item.includes(element)){
-                    caminhos.push(item)
-                }
-            })
-        })
-    })
+          imagens.forEach((element) => {
+            files.forEach((item) => {
+              if (item.includes(element)) {
+                caminhos.push(item);
+              }
+            });
+          });
 
-    glob("public/uploads/*.png", function (er, files) {
-        imagens.map((element) => {
-            files.map((item) => {
-                if(item.includes(element)){
-                    caminhos.push(item)
-                }
-            })
-        })
+          resolve();
+        });
+      })
+    );
+  });
 
-        caminhos.map((item, i) => {
-            caminhos[i] = item.replace('public/uploads/', '')
-        })
+  await Promise.all(promises);
 
-        res.json({caminhos})
-    })
-  }
+  caminhos.forEach((item, i) => {
+    caminhos[i] = item.replace("public/uploads/", "");
+  });
+
+  return caminhos;
 }
