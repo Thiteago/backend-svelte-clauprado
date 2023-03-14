@@ -30,166 +30,185 @@ export class PedidoController {
       cartao,
       vezes
     } = req.body
-    let produtosAlugados = cartItens.filter((element: any) => element.Aluguel != null)
-    let produtosVendidos = cartItens.filter((element: any) => element.Venda != null)
-    
+    let produtosAlugados = cartItens.filter((element: any) => element.Aluguel.length > 0)
+    let produtosVendidos = cartItens.filter((element: any) => element.Venda.length > 0) 
 
     valor_frete = parseFloat(valor_frete)
 
-
     if(produtosAlugados.length > 0) {
-      await prisma.aluguel.updateMany({
-        where: {
-          id: {
-            in: produtosAlugados.map((element: any) => element.Aluguel.id)
-          }
-        },
-        data: {
-          data_aluguel: formatDate(produtosAlugados[0].Aluguel.data_aluguel),
-          data_disponibilidade: formatDate(produtosAlugados[0].Aluguel.data_disponibilidade),
-          data_expiracao:formatDate(produtosAlugados[0].Aluguel.data_expiracao),
-          status_aluguel: produtosAlugados[0].quantidadeEmEstoque > 0 ? "Disponível" : "Indisponível",
-          dias_alugados: produtosAlugados[0].Aluguel.dias_alugados,
+      produtosAlugados.forEach(async (element: any) => {
+        for(let i = 0; i < element.quantidade; i++) {
+          await prisma.aluguel.update({
+            where: {
+              id: element.Aluguel[i].id
+            },
+            data: {
+              data_aluguel: formatDate(element.Aluguel[i].data_aluguel),
+              data_disponibilidade: formatDate(element.Aluguel[i].data_disponibilidade),
+              data_expiracao: formatDate(element.Aluguel[i].data_expiracao),
+              dias_alugados: element.Aluguel[i].dias_alugados,
+              status_aluguel: 'Alugado',
+            }
+          })
         }
       })
     }
 
     if(produtosVendidos.length > 0){
-      await prisma.venda.updateMany({
-        where: {
-          id: {
-            in: produtosVendidos.map((element: any) => element.Venda.id)
-          }
-        },
-        data: {
-          status_venda: produtosVendidos[0].quantidadeEmEstoque > 0 ? "Disponível" : "Indisponível",
+      produtosVendidos.forEach(async (element: any) => {
+        for(let i = 0; i < element.quantidade; i++) {
+          await prisma.venda.update({
+            where: {
+              id: element.Venda[i].id
+            },
+            data: {
+              status_venda: 'Vendido'
+            } 
+          })
         }
       })
     }
 
     if(metodoPagamento === "cartao"){
-      let itens = cartItens.flatMap(element => {
-        let itensList = []
-        if(element.Venda != null){
-          itensList.push(element.Venda.produtoId)
-        }
-        if(element.Aluguel != null){
-          itensList.push(element.Aluguel.produtoId)
-        }
-        return itensList
-      });
+      await prisma.pedido.create({
+        data: {
+          valor: total,
+          userId: idUser,
+          enderecoId: endereco.id,
+          tipo_frete,
+          valor_frete,
+          
+          Pagamento: {
+            create: {
+              valor: total,
+              vezes,
+              forma_pagamento: metodoPagamento,
 
-      if(itens.length > 0){
-        await prisma.pedido.create({
-          data: {
-            valor: total,
-            userId: idUser,
-            enderecoId: endereco.id,
-            tipo_frete,
-            valor_frete,
-            
-            produtos: {
-              connect: itens.map(id => ({ id })),
-            },
-
-            Pagamento: {
-              create: {
-                valor: total,
-                vezes,
-                forma_pagamento: metodoPagamento,
-
-                cartao: {
-                  create: {
-                    numero: cartao.numero,
-                    nome: cartao.nome,
-                    validade: cartao.validade,
-                    bandeira: cartao.bandeira
-                  }
+              cartao: {
+                create: {
+                  numero: cartao.numero,
+                  nome: cartao.nome,
+                  validade: cartao.validade,
+                  bandeira: cartao.bandeira
                 }
               }
             }
           }
+        }
+      }).then((pedidoCriado: any) => {
+        produtosAlugados.forEach(async (element: any) => {
+          for(let i = 0; i < element.quantidade; i++) {
+            await prisma.aluguel.update({
+              where: {
+                id: element.Aluguel[i].id
+              },
+              data: {
+                pedidoId: pedidoCriado.id
+              }
+            })
+          }
+        })
+        produtosVendidos.forEach(async (element: any) => {
+          for(let i = 0; i < element.quantidade; i++) {
+            await prisma.venda.update({
+              where: {
+                id: element.Venda[i].id
+              },
+              data: {
+                pedidoId: pedidoCriado.id
+              } 
+            })
+          }
         })
 
-        await prisma.produto.updateMany({
+      cartItens.forEach(async (element: any) => {
+        await prisma.produto.update({
           where: {
-            id: {
-              in: itens
-            }
+            id: element.id
           },
           data: {
             quantidadeEmEstoque: {
-              decrement: 1
+              decrement: element.quantidade
             },
           }
         })
-        res.status(200).json({message: "Pedido gerado com sucesso"})
-      }
-    }
+      })
+      res.status(200).json({message: "Pedido gerado com sucesso"})
+      })
+    } 
+  
 
-     if(metodoPagamento === "boleto"){
+    if(metodoPagamento === "boleto"){
       let dataBoleto: IBoleto = await geraBoleto(total)
       dataBoleto.nomePDF = dataBoleto.nomePDF.substring(20, 33)
 
-      let itens = cartItens.flatMap(element => {
-        let itensList = []
-        if(element.Venda != null){
-          itensList.push(element.Venda.produtoId)
-        }
-        if(element.Aluguel != null){
-          itensList.push(element.Aluguel.produtoId)
-        }
-        return itensList
-      });
+      await prisma.pedido.create({
+        data: {
+          valor: total,
+          userId: idUser,
+          enderecoId: endereco.id,
+          tipo_frete,
+          valor_frete,
 
-      if(itens.length > 0){
-        await prisma.pedido.create({
-          data: {
-            valor: total,
-            userId: idUser,
-            enderecoId: endereco.id,
-            tipo_frete,
-            valor_frete,
-            
-            produtos: {
-              connect: itens.map(id => ({ id })),
-            },
+          Pagamento: {
+            create: {
+              valor: total,
+              forma_pagamento: metodoPagamento,
 
-            Pagamento: {
-              create: {
-                valor: total,
-                forma_pagamento: metodoPagamento,
-
-                boleto: {
-                  create: {
-                    data_venc: dataBoleto.data_vencimento.toDate(),
-                    valor: dataBoleto.valor,
-                    linhaDigitavel: dataBoleto.linhadigitavel,
-                    numeroBoleto: dataBoleto.barcode,
-                    nomePDF: dataBoleto.nomePDF
-                  }
+              boleto: {
+                create: {
+                  data_venc: dataBoleto.data_vencimento.toDate(),
+                  valor: dataBoleto.valor,
+                  linhaDigitavel: dataBoleto.linhadigitavel,
+                  numeroBoleto: dataBoleto.barcode,
+                  nomePDF: dataBoleto.nomePDF
                 }
               }
             }
           }
+        }
+      }).then((pedidoCriado: any) => {
+        produtosAlugados.forEach(async (element: any) => {
+          for(let i = 0; i < element.quantidade; i++) {
+            await prisma.aluguel.update({
+              where: {
+                id: element.Aluguel[i].id
+              },
+              data: {
+                pedidoId: pedidoCriado.id
+              }
+            })
+          }
         })
+        produtosVendidos.forEach(async (element: any) => {
+          for(let i = 0; i < element.quantidade; i++) {
+            await prisma.venda.update({
+              where: {
+                id: element.Venda[i].id
+              },
+              data: {
+                pedidoId: pedidoCriado.id
+              } 
+            })
+          }
+        })
+      })
 
-        await prisma.produto.updateMany({
+      cartItens.forEach(async (element: any) => {
+        await prisma.produto.update({
           where: {
-            id: {
-              in: itens
-            }
+            id: element.id
           },
           data: {
             quantidadeEmEstoque: {
-              decrement: 1
+              decrement: element.quantidade
             },
           }
         })
-        res.status(200).json({message: "Pedido gerado com sucesso"})
-      }else{
-        res.status(400).json({message: "Erro ao gerar pedido"})
-      }
+      })
+      res.status(200).json({message: "Pedido gerado com sucesso"})
+    }else{
+      res.status(400).json({message: "Erro ao gerar pedido"})
     }
   }
 
