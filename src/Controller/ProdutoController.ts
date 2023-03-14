@@ -56,15 +56,18 @@ export class ProdutoController{
             material ,
             categoria,
             imagens: ids,
-            peso,
-            Venda: {
-              create: {
+            peso
+          },
+        }).then(async (produtoCriado: any) => {
+          for(let i = 0; i < parseInt(quantidade); i++) {
+            await prisma.venda.create({
+              data: {
+                produtoId: produtoCriado.id,
                 tipo: "Venda",
                 status_venda: "Disponível"
               }
-            }
-          },
-        }).then(() => {
+            })
+          }
           res.sendStatus(201)
         })
       }else{
@@ -82,16 +85,18 @@ export class ProdutoController{
             categoria,
             imagens: ids,
             peso,
-            Aluguel: {
-              create: {
-                data_disponibilidade: data_disponibilidade,
-                status_aluguel: "Disponível",
-                dias_alugados: 0,
-                tipo: "Aluguel"
-              }
-            }
           }
-        }).then(() => {
+        }).then(async (produtoCriado: any) => {
+          for(let i = 0; i < parseInt(quantidade); i++) {
+            await prisma.aluguel.create({
+              data: {
+                produtoId: produtoCriado.id,
+                tipo: "Aluguel",
+                data_disponibilidade,
+                status_aluguel: 'Disponível',
+              }
+            })
+          }
           res.sendStatus(201)
         })
       }
@@ -103,8 +108,16 @@ export class ProdutoController{
   async listar (req: Request, res: Response){
     let produtos: any = await prisma.produto.findMany({
       include:{
-        Venda: true,
-        Aluguel: true,
+        Venda: {
+          where: {
+            status_venda: 'Disponível'
+          }
+        },
+        Aluguel: {
+          where: {
+            status_aluguel: 'Disponível'
+          }
+        },
         promocao: true
       }
     })
@@ -134,12 +147,9 @@ export class ProdutoController{
     let {
       nome,           
       descricao,      
-      dataCriacao,     
+      dataFabricacao,     
       quantidade,
       tipo,
-      dataDisponibilidade,
-      dataExpiracao,        
-      status_aluguel,   
       valor,          
       altura,         
       largura,        
@@ -149,118 +159,77 @@ export class ProdutoController{
       peso  
     } = req.body
     peso = parseFloat(peso)
+    console.log(dataFabricacao)
   
 
-    const checkNomeVenda = await prisma.produtoVenda.findFirst({
+    const checkNome = await prisma.produto.findFirst({
       where:{
         nome: nome
       }
     })
 
-    const checkNomeAluguel = await prisma.produtoAluguel.findFirst({
-        where:{
-            nome: nome
-        }
+    const oldProduct = await prisma.produto.findUnique({
+      where: {
+        id: idProduto
+      },
+      include:{
+        Aluguel: true,
+        Venda: true,
+      }
     })
 
-    if(tipo != "Aluguel"){
-        if(checkNomeVenda?.nome == null || checkNomeVenda.id == idProduto){
-            if(myfiles.length > 0){
-                await prisma.produtoVenda.update({
-                    where:{
-                    id: idProduto
-                    },
-                    data:{
-                        nome,
-                        descricao,
-                        dataCriacao,
-                        valor: parseFloat(valor),
-                        quantidadeEmEstoque: parseInt(quantidade),
-                        altura,
-                        largura,
-                        comprimento,
-                        material,
-                        categoria,
-                        imagens : ids
-                    }
-                })
-                return res.sendStatus(201)
-            }else{
-                await prisma.produtoVenda.update({
-                    where:{
-                    id: idProduto
-                    },
-                    data:{
-                        nome,
-                        descricao,
-                        dataCriacao,
-                        valor: parseFloat(valor),
-                        quantidadeEmEstoque: parseInt(quantidade),
-                        altura,
-                        largura,
-                        comprimento,
-                        material,
-                        categoria
-                    }
-                })
-                return res.sendStatus(201)
+    if(checkNome?.nome != null){
+      if(checkNome.id != idProduto){
+        return res.status(500).send('Este nome ja existe!')
+      }
+    }
+    
+    const updateData: any = {
+      nome,
+      categoria,
+      descricao,
+      dataFabricacao: new Date(dataFabricacao),
+      valor: parseFloat(valor),
+      quantidadeEmEstoque: parseInt(quantidade),
+      peso,
+      altura,
+      largura,
+      comprimento,
+      material,
+    };
+
+    if (ids.length > 0) {
+      updateData.imagens = ids;
+    }
+    
+    try {
+      await prisma.produto.update({
+        where: { id: idProduto },
+        data: updateData,
+      });
+
+     
+      if(tipo == 'Aluguel'){
+        if(oldProduct?.Aluguel != null && oldProduct.quantidadeEmEstoque == 0 && quantidade > 0){
+          await prisma.aluguel.update({
+            where:{
+              id: oldProduct.Aluguel.id
+            },
+            data:{
+              status_aluguel: 'Disponível'
             }
+          })
+        }else if(oldProduct?.Aluguel == null && oldProduct?.Venda != null){
+          
         }
-    }else{
-      if(checkNomeAluguel?.nome == null || checkNomeAluguel.id == idProduto){
-          if(myfiles.length > 0){
-              await prisma.produtoAluguel.update({
-                  where:{
-                  id: idProduto
-                  },
-                  data:{
-                      nome,
-                      descricao,
-                      dataCriacao,
-                      data_disponibilidade: new Date(dataDisponibilidade),
-                      data_expiracao: new Date(dataExpiracao),
-                      status_aluguel: status_aluguel,
-                      valor: parseFloat(valor),
-                      quantidadeEmEstoque: parseInt(quantidade),
-                      peso,
-                      altura,
-                      largura,
-                      comprimento,
-                      material,
-                      categoria,
-                      imagens : ids
-                  }
-              })
-              return res.sendStatus(201)
-          }else{
-              await prisma.produtoAluguel.update({
-                  where:{
-                  id: idProduto
-                  },
-                  data:{
-                    nome,
-                    descricao,
-                    dataCriacao,
-                    data_disponibilidade: new Date(dataDisponibilidade),
-                    data_expiracao: new Date(dataExpiracao),
-                    status_aluguel: status_aluguel,
-                    valor: parseFloat(valor),
-                    quantidadeEmEstoque: parseInt(quantidade),
-                    peso,
-                    altura,
-                    largura,
-                    comprimento,
-                    material,
-                    categoria
-                  }
-              })
-              return res.sendStatus(201)
-          }
-      }else{
-    return res.sendStatus(500)
+      }
+
+      return res.sendStatus(201);
+    } catch (error) {
+      console.error(error);
+      return res.sendStatus(500);
     }
   }
-}
 
   async excluir (req: Request, res: Response){
       const idProduto = Number(req.params.id)
@@ -281,8 +250,16 @@ export class ProdutoController{
           id: idProduto
         },
         include: {
-          Venda: true,
-          Aluguel: true,
+          Venda: {
+            where: {
+              status_venda: 'Disponível'
+            }
+          },
+          Aluguel: {
+            where: {
+              status_aluguel: 'Disponível'
+            }
+          },
           promocao: true
         }
     })
@@ -293,7 +270,7 @@ export class ProdutoController{
   }
 }
 
-async function enviarPath(id) {
+async function enviarPath(id: any) {
   const imagens: string[] = [];
   const caminhos: any[] = [];
 
