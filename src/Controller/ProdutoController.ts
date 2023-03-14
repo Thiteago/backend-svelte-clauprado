@@ -12,9 +12,7 @@ export class ProdutoController{
       ids.push(item.filename)
     })
 
-    for(var i = 0; i< ids.length; i++){
-      ids[i] = ids[i].split('_',1)[0]
-    }
+
 
     let {
       nome,           
@@ -208,22 +206,71 @@ export class ProdutoController{
         data: updateData,
       });
 
-     
-      if(tipo == 'Aluguel'){
-        if(oldProduct?.Aluguel != null && oldProduct.quantidadeEmEstoque == 0 && quantidade > 0){
-          await prisma.aluguel.update({
-            where:{
-              id: oldProduct.Aluguel.id
-            },
-            data:{
-              status_aluguel: 'Disponível'
-            }
-          })
-        }else if(oldProduct?.Aluguel == null && oldProduct?.Venda != null){
-          
+      if(tipo == 'Aluguel' && oldProduct){
+        if(oldProduct.Aluguel.length > 0 && oldProduct.quantidadeEmEstoque == 0 && quantidade > 0){
+          for(let i = 0; i < parseInt(quantidade); i++) {
+            await prisma.aluguel.create({
+              data:{
+                data_disponibilidade: new Date(),
+                status_aluguel: 'Disponível',
+                tipo: 'Aluguel',
+
+                produtoId: idProduto
+              }
+            })
+          }
+        }else if(oldProduct.Aluguel.length == 0 && oldProduct.Venda.length > 0){
+          for(let i = 0; i < parseInt(quantidade); i++) {
+            await prisma.venda.delete({
+              where: {
+                id: oldProduct.Venda[i].id
+              },
+            })
+          }
+          for(let i = 0; i < parseInt(quantidade); i++) {
+            await prisma.aluguel.create({
+              data:{
+                data_disponibilidade: new Date(),
+                status_aluguel: 'Disponível',
+                tipo: 'Aluguel',
+
+                produtoId: idProduto
+              }
+            })
+          }
+        }
+      }else if(tipo == 'Venda' && oldProduct){
+        if(oldProduct.Venda.length > 0 && oldProduct.quantidadeEmEstoque == 0 && quantidade > 0){
+          for(let i = 0; i < parseInt(quantidade); i++) {
+            await prisma.venda.create({
+              data:{
+                status_venda: 'Disponível',
+                tipo: 'Venda',
+
+                produtoId: idProduto
+              }
+            })
+          }
+        }else if(oldProduct.Venda.length == 0 && oldProduct.Aluguel.length > 0){
+          for(let i = 0; i < parseInt(quantidade); i++) {
+            await prisma.aluguel.delete({
+              where: {
+                id: oldProduct.Aluguel[i].id
+              },
+            })
+          }
+          for(let i = 0; i < parseInt(quantidade); i++) {
+            await prisma.venda.create({
+              data:{
+                status_venda: 'Disponível',
+                tipo: 'Venda',
+
+                produtoId: idProduto
+              }
+            })
+          }
         }
       }
-
       return res.sendStatus(201);
     } catch (error) {
       console.error(error);
@@ -270,7 +317,7 @@ export class ProdutoController{
   }
 }
 
-async function enviarPath(id: any) {
+export async function enviarPath(id: any) {
   const imagens: string[] = [];
   const caminhos: any[] = [];
 
