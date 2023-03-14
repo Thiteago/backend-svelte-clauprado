@@ -58,9 +58,9 @@ model Produto {
     categoria           String
     imagens             String[]
 
-    Aluguel    Aluguel?
-    Venda      Venda?
-    Pedido     Pedido[]
+    Aluguel Aluguel[]
+    Venda   Venda[]
+
     promocao   Promocao? @relation(fields: [promocaoId], references: [id])
     promocaoId Int?
 }
@@ -88,7 +88,9 @@ model Aluguel {
     tipo                 String    @default("Aluguel")
 
     produto   Produto @relation(fields: [produtoId], references: [id])
-    produtoId Int     @unique
+    produtoId Int
+    Pedido    Pedido? @relation(fields: [pedidoId], references: [id])
+    pedidoId  Int?
 }
 
 model Venda {
@@ -96,8 +98,11 @@ model Venda {
     tipo         String @default("Venda")
     status_venda String @default("Disponivel")
 
+    pedido   Pedido? @relation(fields: [pedidoId], references: [id])
+    pedidoId Int?
+
     produto   Produto @relation(fields: [produtoId], references: [id])
-    produtoId Int     @unique
+    produtoId Int
 }
 
 model Pedido {
@@ -111,7 +116,8 @@ model Pedido {
     user   User @relation(fields: [userId], references: [id])
     userId Int
 
-    produtos  Produto[]
+    vendas    Venda[]
+    alugueis  Aluguel[]
     Pagamento Pagamento?
 
     endereco   Endereco @relation(fields: [enderecoId], references: [id])
