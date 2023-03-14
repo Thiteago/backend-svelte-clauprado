@@ -9,3 +9,4 @@ export const routerPedido = Router();
 
 routerPedido.post("/pedido/gerar", pedidoController.gerar);
 routerPedido.get("/pedido/listar/:id", pedidoController.listarPeloId);
+routerPedido.get("/pedido/listar/", pedidoController.listarTodos);
