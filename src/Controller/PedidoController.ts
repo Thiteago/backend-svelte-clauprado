@@ -12,7 +12,7 @@ interface IBoleto {
   nomePDF: string
 }
 
-function formatDate(date){
+function formatDate(date: any){
   let data = new Date(date)
   let formatedDate = new Date(data.getTime() - data.getTimezoneOffset() * -60000)
   return formatedDate
@@ -47,7 +47,7 @@ export class PedidoController {
               data_disponibilidade: formatDate(element.Aluguel[i].data_disponibilidade),
               data_expiracao: formatDate(element.Aluguel[i].data_expiracao),
               dias_alugados: element.Aluguel[i].dias_alugados,
-              status_aluguel: 'Alugado',
+              status_aluguel: 'Pendente - Aguardando Pagamento',
             }
           })
         }
@@ -62,7 +62,7 @@ export class PedidoController {
               id: element.Venda[i].id
             },
             data: {
-              status_venda: 'Vendido'
+              status_venda: 'Pendente - Aguardando Pagamento'
             } 
           })
         }
@@ -81,7 +81,7 @@ export class PedidoController {
           Pagamento: {
             create: {
               valor: total,
-              vezes,
+              vezes: vezes.toString(),
               forma_pagamento: metodoPagamento,
 
               cartao: {
@@ -133,7 +133,7 @@ export class PedidoController {
           }
         })
       })
-      res.status(200).json({message: "Pedido gerado com sucesso"})
+      return res.status(200).json({message: "Pedido gerado com sucesso"})
       })
     } 
   
@@ -208,7 +208,7 @@ export class PedidoController {
       })
       res.status(200).json({message: "Pedido gerado com sucesso"})
     }else{
-      res.status(400).json({message: "Erro ao gerar pedido"})
+      return res.status(400).json({message: "Erro ao gerar pedido"})
     }
   }
 
@@ -227,7 +227,47 @@ export class PedidoController {
           }
         },
         endereco: true,
-        produtos: true
+      }
+    })
+
+    if(pedidos.length > 0){
+      return res.status(200).json(pedidos)
+    }else{
+      return res.status(400).json({message: "Nenhum pedido encontrado"})
+    }
+  }
+
+  async listarTodos(req: Request, res: Response){
+    const pedidos = await prisma.pedido.findMany({
+      include: {
+        vendas: {
+          include: {
+            produto: true,
+          }
+        },
+        alugueis: {
+          include: {
+            produto: true,
+          }
+        },
+        user: {
+          select: {
+            cpf: true,
+            dataNascimento: true,
+            id: true,
+            numeroCel: true,
+            numeroTel: true,
+            nome: true,
+            email: true
+          }
+        },
+        Pagamento: {
+          include: {
+            boleto: true,
+            cartao: true
+          }
+        },
+        endereco: true,
       }
     })
 
