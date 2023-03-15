@@ -12,7 +12,7 @@ import { routerPromocao } from "./src/Routes/PromocaoRoute";
 const app = express();
 
 const corsOptions = {
-  Origin: '*',
+  origin: '*',
   methods: ['GET', 'PUT', 'POST', 'PATCH', 'DELETE'],
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
