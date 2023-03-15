@@ -38,6 +38,7 @@
     "@types/glob": "^8.0.0",
     "@types/jsonwebtoken": "^8.5.8",
     "nodemon": "^2.0.19",
+    "moment": "^2.29.4",
     "prisma": "^4.3.1",
     "rimraf": "^4.4.0",
     "ts-node": "^10.9.1",
