@@ -38,7 +38,6 @@ export class ProdutoController{
         nome: nome
       }
     })
-
     if(checkNomeProduto == null){
       if(tipo != "Aluguel"){
         await prisma.produto.create({
@@ -99,7 +98,7 @@ export class ProdutoController{
         })
       }
     }else{
-      res.sendStatus(500)
+      return res.sendStatus(409)
     }
   }
     
@@ -157,8 +156,6 @@ export class ProdutoController{
       peso  
     } = req.body
     peso = parseFloat(peso)
-    console.log(dataFabricacao)
-  
 
     const checkNome = await prisma.produto.findFirst({
       where:{
