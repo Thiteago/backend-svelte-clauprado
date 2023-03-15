@@ -61,7 +61,7 @@ export class ProdutoController{
               data: {
                 produtoId: produtoCriado.id,
                 tipo: "Venda",
-                status_venda: "Disponível"
+                status_venda: "Disponivel"
               }
             })
           }
@@ -90,7 +90,7 @@ export class ProdutoController{
                 produtoId: produtoCriado.id,
                 tipo: "Aluguel",
                 data_disponibilidade,
-                status_aluguel: 'Disponível',
+                status_aluguel: 'Disponivel',
               }
             })
           }
@@ -106,25 +106,19 @@ export class ProdutoController{
     let produtos: any = await prisma.produto.findMany({
       include:{
         Venda: {
-          where: {
-            status_venda: 'Disponível'
+          where:{
+            status_venda: "Disponivel"
           }
         },
         Aluguel: {
-          where: {
-            status_aluguel: 'Disponível'
+          where:{
+            status_aluguel: "Disponivel"
           }
         },
         promocao: true
       }
     })
 
-    produtos = produtos.map(async(produto: any) => {
-      produto = {...produto, caminhos: await enviarPath(produto.id)}
-      return produto
-    })
-    
-    produtos = await Promise.all(produtos)
     return res.json(produtos)
   }
 
@@ -209,7 +203,7 @@ export class ProdutoController{
             await prisma.aluguel.create({
               data:{
                 data_disponibilidade: new Date(),
-                status_aluguel: 'Disponível',
+                status_aluguel: 'Disponivel',
                 tipo: 'Aluguel',
 
                 produtoId: idProduto
@@ -228,7 +222,7 @@ export class ProdutoController{
             await prisma.aluguel.create({
               data:{
                 data_disponibilidade: new Date(),
-                status_aluguel: 'Disponível',
+                status_aluguel: 'Disponivel',
                 tipo: 'Aluguel',
 
                 produtoId: idProduto
@@ -241,7 +235,7 @@ export class ProdutoController{
           for(let i = 0; i < parseInt(quantidade); i++) {
             await prisma.venda.create({
               data:{
-                status_venda: 'Disponível',
+                status_venda: 'Disponivel',
                 tipo: 'Venda',
 
                 produtoId: idProduto
@@ -259,7 +253,7 @@ export class ProdutoController{
           for(let i = 0; i < parseInt(quantidade); i++) {
             await prisma.venda.create({
               data:{
-                status_venda: 'Disponível',
+                status_venda: 'Disponivel',
                 tipo: 'Venda',
 
                 produtoId: idProduto
@@ -296,68 +290,18 @@ export class ProdutoController{
         include: {
           Venda: {
             where: {
-              status_venda: 'Disponível'
+              status_venda: 'Disponivel'
             }
           },
           Aluguel: {
             where: {
-              status_aluguel: 'Disponível'
+              status_aluguel: 'Disponivel'
             }
           },
           promocao: true
         }
     })
-
-    produto = {...produto, caminhos: await enviarPath(produto.id)}
   
     return res.json(produto)
   }
-}
-
-export async function enviarPath(id: any) {
-  const imagens: string[] = [];
-  const caminhos: any[] = [];
-
-  const query = await prisma.produto.findMany({
-    where: {
-      id: id,
-    },
-  });
-
-  query.forEach((item) => {
-    item.imagens.forEach((element) => {
-      imagens.push(element);
-    });
-  });
-
-  const extensions = ["jpg", "jpeg", "png"];
-  const promises: any[] = [];
-
-  extensions.forEach((extension) => {
-    promises.push(
-      new Promise<void>((resolve, reject) => {
-        glob(`public/uploads/*.${extension}`, (err, files) => {
-          if (err) reject(err);
-
-          imagens.forEach((element) => {
-            files.forEach((item) => {
-              if (item.includes(element)) {
-                caminhos.push(item);
-              }
-            });
-          });
-
-          resolve();
-        });
-      })
-    );
-  });
-
-  await Promise.all(promises);
-
-  caminhos.forEach((item, i) => {
-    caminhos[i] = item.replace("public/uploads/", "");
-  });
-
-  return caminhos;
 }
