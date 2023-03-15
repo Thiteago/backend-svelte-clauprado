@@ -233,7 +233,7 @@ export class PedidoController {
     if(pedidos.length > 0){
       return res.status(200).json(pedidos)
     }else{
-      return res.status(400).json({message: "Nenhum pedido encontrado"})
+      return res.status(404).json({message: "Nenhum pedido encontrado"})
     }
   }
 
@@ -274,8 +274,66 @@ export class PedidoController {
     if(pedidos.length > 0){
       res.status(200).json(pedidos)
     }else{
-      res.status(400).json({message: "Nenhum pedido encontrado"})
+      res.status(404).json({message: "Nenhum pedido encontrado"})
     }
+  }
+
+  async alterarProdutos(req: Request, res: Response){
+    const {id} = req.params
+    const {produtosAlugados, produtosVendidos} = req.body
+    let produtosAlugadosId: any = []
+    let countedProdutosAlugados: any = []
+
+    if(produtosAlugados.length > 0){
+      for(let i = 0; i < produtosAlugados.length ; i++) {
+        await prisma.aluguel.update({
+          where: {
+            id: produtosAlugados[i],
+          },
+          data: {
+            data_aluguel: null,
+            data_expiracao: null,
+            status_aluguel: "Disponivel",
+            dias_alugados: 0,
+            tipo: "Aluguel",
+            pedidoId: null
+          }
+        })
+
+        const alugueis = await prisma.aluguel.findUnique({
+          where: {
+            id: produtosAlugados[i]
+          },
+          include: {
+            produto: true
+          }
+        })
+
+        if(alugueis){
+          produtosAlugadosId = [...produtosAlugadosId, alugueis.produto.id]
+        }
+      }
+
+      countedProdutosAlugados = produtosAlugadosId.reduce((acc: any, val: any) => {
+        acc[val] = (acc[val] || 0) + 1;
+        return acc;
+      }, {});
+
+      for(let [key, value] of Object.entries(countedProdutosAlugados)){
+        await prisma.produto.update({
+          where: {
+            id: Number(key)
+          },
+          data: {
+            quantidadeEmEstoque: {
+              increment: Number(value)
+            }
+          }
+        })
+      }
+    }
+  }
+  async alterarEndereco(req: Request, res: Response){
   }
 }
 async function geraBoleto(valor: number){
