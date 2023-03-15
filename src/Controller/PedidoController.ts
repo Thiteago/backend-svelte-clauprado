@@ -212,7 +212,7 @@ export class PedidoController {
     }
   }
 
-  async listarPeloId(req: Request, res: Response){
+  async listarPeloUserId(req: Request, res: Response){
     const {id} = req.params
 
     const pedidos = await prisma.pedido.findMany({
@@ -235,6 +235,54 @@ export class PedidoController {
     }else{
       return res.status(404).json({message: "Nenhum pedido encontrado"})
     }
+  }
+
+  async listarPeloId(req: Request, res: Response){  
+    const {id} = req.params
+
+    const pedido = await prisma.pedido.findUnique({
+      where: {
+        id: Number(id)
+      },
+      include: {
+        vendas: {
+          include: {
+            produto: true,
+          }
+        },
+        alugueis: {
+          include: {
+            produto: true,
+          }
+        },
+        user: {
+          select: {
+            cpf: true,
+            dataNascimento: true,
+            id: true,
+            numeroCel: true,
+            numeroTel: true,
+            nome: true,
+            email: true
+          }
+        },
+        Pagamento: {
+          include: {
+            boleto: true,
+            cartao: true
+          }
+        },
+        endereco: true,
+      }
+    })
+
+
+    if(pedido){
+      return res.status(200).json(pedido)
+    }else{
+      return res.status(404).json({message: "Nenhum pedido encontrado"})
+    }
+
   }
 
   async listarTodos(req: Request, res: Response){
@@ -279,10 +327,11 @@ export class PedidoController {
   }
 
   async alterarProdutos(req: Request, res: Response){
-    const {id} = req.params
     const {produtosAlugados, produtosVendidos} = req.body
     let produtosAlugadosId: any = []
+    let produtosVendidosId: any = []
     let countedProdutosAlugados: any = []
+    let countedProdutosVendidos: any = []
 
     if(produtosAlugados.length > 0){
       for(let i = 0; i < produtosAlugados.length ; i++) {
@@ -296,7 +345,8 @@ export class PedidoController {
             status_aluguel: "Disponivel",
             dias_alugados: 0,
             tipo: "Aluguel",
-            pedidoId: null
+            pedidoId: null,
+            produtoId: produtosAlugados[i]
           }
         })
 
@@ -331,7 +381,57 @@ export class PedidoController {
           }
         })
       }
+      return res.status(200).json({message: "Produtos devolvidos com sucesso"})
     }
+    if(produtosVendidos.length > 0){
+      for(let i = 0; i < produtosVendidos.length ; i++) {
+        await prisma.venda.update({
+          where: {
+            id: produtosVendidos[i],
+          },
+          data: {
+            status_venda: "Disponivel",
+            pedidoId: null,
+          }
+        })
+
+        const vendas = await prisma.venda.findUnique({
+          where: {
+            id: produtosVendidos[i]
+          },
+          include: {
+            produto: true
+          }
+        })
+
+
+        if(vendas){
+          produtosVendidosId = [...produtosVendidosId, vendas.produto.id]
+        }
+      }
+
+      countedProdutosVendidos = produtosVendidosId.reduce((acc: any, val: any) => {
+        acc[val] = (acc[val] || 0) + 1;
+        return acc;
+      }, {});
+
+      for(let [key, value] of Object.entries(countedProdutosVendidos)){
+        await prisma.produto.update({
+          where: {
+            id: Number(key)
+          },
+          data: {
+            quantidadeEmEstoque: {
+              increment: Number(value)
+            }
+          }
+        })
+      }
+      return res.status(200).json({message: "Produtos devolvidos com sucesso"})
+    }else{
+      return res.status(404).json({message: "Nenhum produto encontrado"})
+    }
+    
   }
   async alterarEndereco(req: Request, res: Response){
   }
