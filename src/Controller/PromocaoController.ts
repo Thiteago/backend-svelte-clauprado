@@ -29,7 +29,7 @@ export class PromocaoController {
     }
 
     if(produtos.length > 0) {
-      produtos.forEach(element => {
+      produtos.forEach((element: any)=> {
         if(!produtosPorId.includes(element)){
           produtosPorId = [...produtosPorId, element]
         }
@@ -45,7 +45,7 @@ export class PromocaoController {
         categorias,
         valor_desconto,
         produtos: {
-          connect: produtosPorId.map(id => ({ id: Number(id) }))
+          connect: produtosPorId.map((id: any) => ({ id: Number(id) }))
         }
       },
     });
