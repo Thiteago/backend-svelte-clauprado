@@ -27,12 +27,9 @@
     "glob": "^8.0.3",
     "html-pdf": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
-    "moment": "^2.29.4",
     "multer": "^1.4.5-lts.1",
     "node-boleto": "^2.2.1",
-    "nodeman": "^1.1.2",
-    "pg": "^8.7.3",
-    "sulla": "^2.4.0"
+    "pg": "^8.7.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
