@@ -433,6 +433,128 @@ export class PedidoController {
     }
     
   }
+
+  async cancelarPedido(req: Request, res: Response){
+    const {id} = req.params
+
+    const pedido = await prisma.pedido.findUnique({
+      where: {
+        id: Number(id)
+      },
+      include: {
+        alugueis: {
+          include: {
+            produto: true
+          }
+        },
+        vendas: {
+          include: {
+            produto: true
+          }
+        }
+      }
+    })
+
+    if(pedido){
+      if(pedido.alugueis.length > 0){
+        for(let i = 0; i < pedido.alugueis.length ; i++) {
+          await prisma.aluguel.update({
+            where: {
+              id: pedido.alugueis[i].id,
+            },
+            data: {
+              data_aluguel: null,
+              data_expiracao: null,
+              status_aluguel: "Disponivel",
+              dias_alugados: 0,
+              tipo: "Aluguel",
+              pedidoId: null,
+            }
+          })
+
+          await prisma.produto.update({
+            where: {
+              id: pedido.alugueis[i].produto.id
+            },
+            data: {
+              quantidadeEmEstoque: {
+                increment: 1
+              }
+            }
+          })
+        }
+
+      }
+      if(pedido.vendas.length > 0){
+        for(let i = 0; i < pedido.vendas.length ; i++) {
+          await prisma.venda.update({
+            where: {
+              id: pedido.vendas[i].id,
+            },
+            data: {
+              status_venda: "Disponivel",
+              pedidoId: null,
+            }
+          })
+
+          await prisma.produto.update({
+            where: {
+              id: pedido.vendas[i].produto.id
+            },
+            data: {
+              quantidadeEmEstoque: {
+                increment: 1
+              }
+            }
+          })
+        }
+      }
+
+      const pagamento = await prisma.pagamento.findUnique({
+        where: {
+          pedidoId: Number(id)
+        },
+        include:{
+          boleto: true,
+          cartao: true
+        }
+      })
+
+      if(pagamento){      
+        if(pagamento.boleto){
+          await prisma.boleto.delete({
+            where: {
+              id: pagamento.boleto.id
+            }
+          })
+        }
+        if(pagamento.cartao){
+          await prisma.cartao.delete({
+            where: {
+              id: pagamento.cartao.id
+            }
+          })
+        }
+        
+        await prisma.pagamento.delete({
+          where: {
+            pedidoId: Number(id)
+          }
+        })
+      }
+          
+      await prisma.pedido.delete({
+        where: {
+          id: Number(id)
+        }
+      })
+
+      return res.status(200).json({message: "Pedido cancelado com sucesso"})
+    }else{
+      return res.status(404).json({message: "Nenhum pedido encontrado"})
+    }
+  }
+
   async alterarEndereco(req: Request, res: Response){
   }
 }
