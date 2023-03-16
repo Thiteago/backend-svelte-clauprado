@@ -132,10 +132,11 @@ model Pagamento {
     status          String    @default("Pendente")
     vezes           String    @default("A vista")
 
-    pedido   Pedido  @relation(fields: [pedidoId], references: [id])
-    pedidoId Int     @unique
-    boleto   Boleto?
-    cartao   Cartao?
+    pedido   Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+    pedidoId Int    @unique
+
+    boleto Boleto?
+    cartao Cartao?
 }
 
 model Boleto {
@@ -147,7 +148,7 @@ model Boleto {
     numeroBoleto   String
     nomePDF        String
 
-    pagamento   Pagamento @relation(fields: [pagamentoId], references: [id])
+    pagamento   Pagamento @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
     pagamentoId Int       @unique
 }
 
@@ -159,6 +160,6 @@ model Cartao {
     bandeira    String
     data_criado DateTime @default(now())
 
-    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id])
+    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
     pagamentoId Int        @unique
 }
