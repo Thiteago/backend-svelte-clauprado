@@ -5,9 +5,9 @@
 /.pnp
 .pnp.js
 
-public/uploads
+public/uploads/*
 
-/src/boletos/*
+src/boletos/*
 
 # testing
 /coverage
