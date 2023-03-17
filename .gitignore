@@ -5,9 +5,11 @@
 /.pnp
 .pnp.js
 
-public/uploads/*
+public/uploads/*.jpg
+public/uploads/*.png
+public/uploads/*.jpeg
 
-src/boletos/*
+src/boletos/*.pdf
 
 # testing
 /coverage
