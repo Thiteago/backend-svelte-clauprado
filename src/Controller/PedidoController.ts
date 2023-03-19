@@ -555,6 +555,28 @@ export class PedidoController {
     }
   }
 
+  async marcarComoEnviado(req: Request, res:  Response){
+    const id = Number(req.params.id)
+    const {codigo_rastreio, data_envio} = req.body
+
+    const pedido = await prisma.pedido.update({
+      where: {
+        id: id
+      },
+      data: {
+        status: "Enviado",
+        data_envio: data_envio,
+        codigo_rastreio: codigo_rastreio
+      }
+    })
+
+    if(pedido){
+      return res.status(200).json({message: "Pedido marcado como enviado com sucesso"})
+    }else{
+      return res.status(404).json({message: "Nenhum pedido encontrado"})
+    }
+  }
+
   async alterarEndereco(req: Request, res: Response){
   }
 }
