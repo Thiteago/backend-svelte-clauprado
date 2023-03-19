@@ -106,12 +106,14 @@ model Venda {
 }
 
 model Pedido {
-    id          Int      @id @default(autoincrement())
-    data_pedido DateTime @default(now())
-    status      String   @default("Pendente")
-    valor       Float
-    tipo_frete  String   @default("PAC")
-    valor_frete Float
+    id              Int       @id @default(autoincrement())
+    data_pedido     DateTime  @default(now())
+    status          String    @default("Pendente")
+    valor           Float
+    tipo_frete      String    @default("PAC")
+    valor_frete     Float
+    data_envio      DateTime?
+    codigo_rastreio String?
 
     user   User @relation(fields: [userId], references: [id])
     userId Int
