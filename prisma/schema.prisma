@@ -11,16 +11,16 @@ datasource db {
 }
 
 model User {
-    id             Int    @id @default(autoincrement())
+    id             Int     @id @default(autoincrement())
     nome           String
-    dataNascimento String
-    email          String @unique
+    dataNascimento String?
+    email          String  @unique
     senha          String
-    cpf            String @unique
-    numeroTel      String
+    cpf            String  @unique
+    numeroTel      String?
     numeroCel      String
-    cargo          String @default("Usuario")
-    status         String @default("Ativo")
+    cargo          String  @default("Usuario")
+    status         String  @default("Ativo")
 
     pedidos   Pedido[]
     enderecos Endereco[]
