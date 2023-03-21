@@ -18,12 +18,14 @@ export class UsuarioController {
       cep,
       numeroTel,
       numeroCel,
-      cargo
-    } = req.body;
+    } = req.body; 
 
-    const userExists = await prisma.user.findUnique({where: {email}})
+    const emailExists = await prisma.user.findUnique({
+      where: { email },
+    })
+    const cpfExists = await prisma.user.findUnique({where: {cpf}})
 
-    if(userExists){
+    if(emailExists || cpfExists){
       return res.status(401).json({message: "User Already Exists!"})
     }
     const hash_password = await hash(senha, 8)
