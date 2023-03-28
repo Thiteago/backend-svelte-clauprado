@@ -29,7 +29,11 @@ export class CarrinhoController {
         }
       })
 
-      if(item.quantidade > produto?.Venda.length || item.quantidade > produto?.Aluguel.length){
+      if(produto){
+        if(item.quantidade > produto?.Venda.length || item.quantidade > produto?.Aluguel.length){
+          return res.status(400).json({message: 'Carrinho indisponível'})
+        }
+      }else{
         return res.status(400).json({message: 'Carrinho indisponível'})
       }
      })
