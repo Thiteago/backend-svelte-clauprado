@@ -18,6 +18,7 @@ export class UsuarioController {
       cep,
       numeroTel,
       numeroCel,
+      endereco
     } = req.body; 
 
     const emailExists = await prisma.user.findUnique({
@@ -29,7 +30,6 @@ export class UsuarioController {
       return res.status(401).json({message: "User Already Exists!"})
     }
     const hash_password = await hash(senha, 8)
-    
     const user = await prisma.user.create({
       data: {
         nome,
@@ -40,20 +40,52 @@ export class UsuarioController {
         numeroTel,
         numeroCel,
         cargo: "Usuario",
-
-        enderecos: {
-          create: {
+      },
+    }).then(async (user) => {
+      if(endereco.length > 0){
+        for(let i = 0; i < endereco.length; i++){
+          if(endereco[i].principal == true){
+            await prisma.endereco.create({
+              data: {
+                rua: endereco[i].rua,
+                numeroRua: endereco[i].numeroRua,
+                bairro: endereco[i].bairro,
+                cidade: endereco[i].cidade,
+                estado: endereco[i].estado,
+                cep: endereco[i].cep,
+                principal: endereco[i].principal,
+                userId: user.id
+              }
+            })
+          }else{
+            await prisma.endereco.create({
+              data: {
+                rua: endereco[i].rua,
+                numeroRua: endereco[i].numeroRua,
+                bairro: endereco[i].bairro,
+                cidade: endereco[i].cidade,
+                estado: endereco[i].estado,
+                cep: endereco[i].cep,
+                userId: user.id
+              }
+            })
+          }
+        }
+      }else{
+        await prisma.endereco.create({
+          data: {
             rua,
             numeroRua,
             bairro,
             cidade,
-            cep,
             estado,
-            principal: true
+            cep,
+            principal: true,
+            userId: user.id
           }
-        }
-      },
-    });
+        })
+      }
+    })
 
     return res.status(201).json({user})
   }
@@ -122,8 +154,9 @@ export class UsuarioController {
 
   async cadastrarNovoEndereco(req: Request, res: Response){
     const idPerson = Number(req.params.id)
+    let novoEndereco = null
 
-    const {rua, numeroRua, bairro, cidade, estado, cep, principal} = req.body
+    const {rua, numeroRua, bairro, cidade, estado, cep, principal, endereco} = req.body
 
     if(principal == true){
       await prisma.endereco.updateMany({
@@ -135,21 +168,41 @@ export class UsuarioController {
         }
       })
     }
-
-    const endereco = await prisma.endereco.create({
-      data: {
-        rua,
-        numeroRua,
-        bairro,
-        cidade,
-        estado,
-        cep,
-        principal: principal,
-        userId: idPerson
-      }
-    })
-
+    
     if(endereco){
+      novoEndereco = await prisma.endereco.create({
+        data: {
+          rua: endereco.rua,
+          numeroRua: endereco.numeroRua,
+          bairro: endereco.bairro,
+          cidade: endereco.cidade,
+          estado: endereco.estado,
+          cep: endereco.cep,
+          principal: false,
+          
+          user: {
+            connect: {
+              id: idPerson
+            }
+          }
+        }
+      })
+    }else{
+      novoEndereco = await prisma.endereco.create({
+        data: {
+          rua,
+          numeroRua,
+          bairro,
+          cidade,
+          estado,
+          cep,
+          principal: principal,
+          userId: idPerson
+        }
+      })
+    }
+
+    if(novoEndereco){
       return res.status(201).json({message: "Endereço cadastrado com sucesso"})
     }else{
       return res.status(401).json({error: "Erro ao cadastrar endereço"})
