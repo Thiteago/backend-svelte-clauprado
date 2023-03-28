@@ -18,7 +18,7 @@ export class CarrinhoController {
     const carrinho = req.body;
 
     if(Object.keys(carrinho).length > 0){
-     carrinho.forEach(async (item: any) => {
+    carrinho.forEach(async (item: any) => {
       const produto = await prisma.produto.findUnique({
         where: {
           id: item.id
@@ -36,7 +36,7 @@ export class CarrinhoController {
       }else{
         return res.status(400).json({message: 'Carrinho indisponível'})
       }
-     })
+    })
 
       return res.status(200).json({message: 'Carrinho disponível'})
     }
