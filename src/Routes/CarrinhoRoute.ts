@@ -8,6 +8,7 @@ export const routerCarrinho = Router();
 
 
 routerCarrinho.get("/carrinho/frete/:cep", carrinhocontroller.calcularFrete);
+routerCarrinho.post('/carrinho/verificarDisponibilidade', carrinhocontroller.verificarDisponibilidade)
 
 
 
