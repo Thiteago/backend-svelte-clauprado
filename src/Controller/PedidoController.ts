@@ -26,7 +26,7 @@ export class PedidoController {
       cartItens, 
       idUser,
       metodoPagamento,
-      endereco,
+      enderecoDeEntrega,
       cartao,
       vezes
     } = req.body
@@ -74,7 +74,7 @@ export class PedidoController {
         data: {
           valor: total,
           userId: idUser,
-          enderecoId: endereco.id,
+          enderecoId: enderecoDeEntrega.id,
           tipo_frete,
           valor_frete,
           
@@ -146,7 +146,7 @@ export class PedidoController {
         data: {
           valor: total,
           userId: idUser,
-          enderecoId: endereco.id,
+          enderecoId: enderecoDeEntrega.id,
           tipo_frete,
           valor_frete,
 
