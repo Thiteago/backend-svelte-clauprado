@@ -42,7 +42,7 @@ export class UsuarioController {
         cargo: "Usuario",
       },
     }).then(async (user) => {
-      if(endereco.length > 0){
+      if(endereco?.length > 0){
         for(let i = 0; i < endereco.length; i++){
           if(endereco[i].principal == true){
             await prisma.endereco.create({
@@ -75,7 +75,7 @@ export class UsuarioController {
         await prisma.endereco.create({
           data: {
             rua,
-            numeroRua,
+            numeroRua: numeroRua.toString(),
             bairro,
             cidade,
             estado,
