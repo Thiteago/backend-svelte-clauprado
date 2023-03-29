@@ -1,8 +1,13 @@
 import { Request, Response } from "express";
+const { CLIENT_ID, APP_SECRET } = process.env;
 import { prisma } from "../utils/prisma";
 const pdf = require("html-pdf");
 var Boleto = require('node-boleto').Boleto;
 const time = new Date().getTime()
+const baseURL = {
+  sandbox: "https://api-m.sandbox.paypal.com",
+  production: "https://api-m.paypal.com"
+};
 
 interface IBoleto {
   valor: number;
@@ -20,6 +25,7 @@ function formatDate(date: any){
 
 export class PedidoController {
   async gerar(req: Request, res: Response) {
+ 
     let {total,
       tipo_frete,
       valor_frete,
@@ -28,45 +34,48 @@ export class PedidoController {
       metodoPagamento,
       enderecoDeEntrega,
       cartao,
-      vezes
+      vezes,
+      valor
     } = req.body
     let produtosAlugados = cartItens.filter((element: any) => element.Aluguel.length > 0)
     let produtosVendidos = cartItens.filter((element: any) => element.Venda.length > 0) 
 
     valor_frete = parseFloat(valor_frete)
 
-    if(produtosAlugados.length > 0) {
-      produtosAlugados.forEach(async (element: any) => {
-        for(let i = 0; i < element.quantidade; i++) {
-          await prisma.aluguel.update({
-            where: {
-              id: element.Aluguel[i].id
-            },
-            data: {
-              data_aluguel: formatDate(element.Aluguel[i].data_aluguel),
-              data_disponibilidade: formatDate(element.Aluguel[i].data_disponibilidade),
-              data_expiracao: formatDate(element.Aluguel[i].data_expiracao),
-              dias_alugados: element.Aluguel[i].dias_alugados,
-              status_aluguel: 'Pendente - Aguardando Pagamento',
-            }
-          })
-        }
-      })
-    }
+    if(produtosAlugados || produtosVendidos){
+      if(produtosAlugados.length > 0) {
+        produtosAlugados.forEach(async (element: any) => {
+          for(let i = 0; i < element.quantidade; i++) {
+            await prisma.aluguel.update({
+              where: {
+                id: element.Aluguel[i].id
+              },
+              data: {
+                data_aluguel: formatDate(element.Aluguel[i].data_aluguel),
+                data_disponibilidade: formatDate(element.Aluguel[i].data_disponibilidade),
+                data_expiracao: formatDate(element.Aluguel[i].data_expiracao),
+                dias_alugados: element.Aluguel[i].dias_alugados,
+                status_aluguel: 'Pendente - Aguardando Pagamento',
+              }
+            })
+          }
+        })
+      }
 
-    if(produtosVendidos.length > 0){
-      produtosVendidos.forEach(async (element: any) => {
-        for(let i = 0; i < element.quantidade; i++) {
-          await prisma.venda.update({
-            where: {
-              id: element.Venda[i].id
-            },
-            data: {
-              status_venda: 'Pendente - Aguardando Pagamento'
-            } 
-          })
-        }
-      })
+      if(produtosVendidos.length > 0){
+        produtosVendidos.forEach(async (element: any) => {
+          for(let i = 0; i < element.quantidade; i++) {
+            await prisma.venda.update({
+              where: {
+                id: element.Venda[i].id
+              },
+              data: {
+                status_venda: 'Pendente - Aguardando Pagamento'
+              } 
+            })
+          }
+        })
+      }
     }
 
     if(metodoPagamento === "cartao"){
@@ -137,7 +146,6 @@ export class PedidoController {
       })
     } 
   
-
     if(metodoPagamento === "boleto"){
       let dataBoleto: IBoleto = await geraBoleto(total)
       dataBoleto.nomePDF = dataBoleto.nomePDF.substring(20, 33)
@@ -207,6 +215,73 @@ export class PedidoController {
         })
       })
       res.status(200).json({message: "Pedido gerado com sucesso"})
+    }
+    
+    if(metodoPagamento === "paypal"){
+      console.log('entrei')
+      const paypalOrder = await createOrder(total)
+      await prisma.pedido.create({
+        data: {
+          valor: total,
+          userId: idUser,
+          enderecoId: enderecoDeEntrega.id,
+          tipo_frete,
+          valor_frete,
+          Pagamento: {
+            create: {
+              valor: total,
+              forma_pagamento: metodoPagamento,
+  
+                paypal: {
+                  create: {
+                    id: paypalOrder.id,
+                    status: paypalOrder.status,
+                    link: paypalOrder.links[0].href
+                  }
+                }
+              }
+            }
+          }
+      }).then((pedidoCriado: any) => {
+        produtosAlugados.forEach(async (element: any) => {
+          for(let i = 0; i < element.quantidade; i++) {
+            await prisma.aluguel.update({
+              where: {
+                id: element.Aluguel[i].id
+              },
+              data: {
+                pedidoId: pedidoCriado.id
+              }
+            })
+          }
+        })
+        produtosVendidos.forEach(async (element: any) => {
+          for(let i = 0; i < element.quantidade; i++) {
+            await prisma.venda.update({
+              where: {
+                id: element.Venda[i].id
+              },
+              data: {
+                pedidoId: pedidoCriado.id
+              } 
+            })
+          }
+        })
+  
+        cartItens.forEach(async (element: any) => {
+          await prisma.produto.update({
+            where: {
+              id: element.id
+            },
+            data: {
+              quantidadeEmEstoque: {
+                decrement: element.quantidade
+              },
+            }
+          })
+        })
+          return res.status(200).json(paypalOrder)
+      })
     }else{
       return res.status(400).json({message: "Erro ao gerar pedido"})
     }
@@ -579,7 +654,69 @@ export class PedidoController {
 
   async alterarEndereco(req: Request, res: Response){
   }
+
+  async capturarPagamento(req: Request, res: Response){
+    const { orderID } = req.body;
+    const captureData = await capturePayment(orderID);
+    // TODO: store payment information such as the transaction ID
+    res.json(captureData);
+  }
 }
+
+
+async function capturePayment(orderId: any) {
+  const accessToken = await generateAccessToken();
+  const url = `${baseURL.sandbox}/v2/checkout/orders/${orderId}/capture`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const data = await response.json();
+  return data;
+}
+
+async function createOrder(value: any) {
+  const accessToken = await generateAccessToken();
+  const url = `${baseURL.sandbox}/v2/checkout/orders`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: {
+            currency_code: "BRL",
+            value: value,
+          },
+        },
+      ],
+    }),
+  });
+  const data = await response.json();
+  return data;
+}
+
+
+async function generateAccessToken() {
+  const auth = Buffer.from(CLIENT_ID + ":" + APP_SECRET).toString("base64")
+  const response = await fetch(`${baseURL.sandbox}/v1/oauth2/token`, {
+    method: "POST",
+    body: "grant_type=client_credentials",
+    headers: {
+      Authorization: `Basic ${auth}`,
+    },
+  });
+  const data = await response.json();
+  return data.access_token;
+}
+
 async function geraBoleto(valor: number){
   valor = valor * 100
   let nomePDF = `./src/boletos/boleto${time}.pdf`
