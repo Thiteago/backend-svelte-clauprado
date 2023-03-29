@@ -16,29 +16,46 @@ export class CarrinhoController {
 
   async verificarDisponibilidade(req: Request, res: Response) {
     const carrinho = req.body;
+    let disponivel = true
 
     if(Object.keys(carrinho).length > 0){
-    carrinho.forEach(async (item: any) => {
-      const produto = await prisma.produto.findUnique({
-        where: {
-          id: item.id
-        },
-        include: {
-          Venda: true,
-          Aluguel: true
-        }
-      })
+      carrinho.forEach(async (item: any) => {
+        const produto = await prisma.produto.findUnique({
+          where: {
+            id: item.id
+          },
+          include: {
+            Venda: true,
+            Aluguel: true
+          }
+        })
 
-      if(produto){
-        if(item.quantidade > produto?.Venda.length || item.quantidade > produto?.Aluguel.length){
+        if(produto){
+          if(produto.Aluguel.length > 0){
+            let qtdDisponivel = produto.Aluguel.filter((aluguel: any) => aluguel.status_aluguel === 'Disponivel').length
+            if(item.quantidade > qtdDisponivel){
+              disponivel = false
+            }
+          }else if(produto.Venda.length > 0){
+            let qtdDisponivel = produto.Venda.filter((venda: any) => venda.status_venda === 'Disponivel').length
+            if(item.quantidade > qtdDisponivel){
+              disponivel = false
+            }
+          }
+
+        }else{
+          console.log('to vindo aqui?')
           return res.status(400).json({message: 'Carrinho indisponível'})
         }
-      }else{
-        return res.status(400).json({message: 'Carrinho indisponível'})
-      }
-    })
+      })
+    }else{
+      return res.status(400).json({message: 'Carrinho indisponível'})
+    }
 
+    if(disponivel){
       return res.status(200).json({message: 'Carrinho disponível'})
+    }else{
+      return res.status(400).json({message: 'Carrinho indisponível'})
     }
   }
 }
