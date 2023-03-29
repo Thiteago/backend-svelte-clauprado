@@ -15,3 +15,4 @@ routerPedido.delete("/pedido/cancelar/:id", pedidoController.cancelarPedido);
 routerPedido.patch("/pedido/alterar/produtos/", pedidoController.alterarProdutos);
 routerPedido.patch("/pedido/alterar/endereco/:id", pedidoController.alterarEndereco);
 routerPedido.patch("/pedido/informarenvio/:id", pedidoController.marcarComoEnviado);
+routerPedido.post("/pedido/capturar/", pedidoController.capturarPagamento);
