@@ -139,6 +139,7 @@ model Pagamento {
 
     boleto Boleto?
     cartao Cartao?
+    paypal Paypal?
 }
 
 model Boleto {
@@ -161,6 +162,15 @@ model Cartao {
     validade    String
     bandeira    String
     data_criado DateTime @default(now())
+
+    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
+    pagamentoId Int        @unique
+}
+
+model Paypal {
+    id     String @id
+    status String
+    link   String
 
     pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
     pagamentoId Int        @unique
