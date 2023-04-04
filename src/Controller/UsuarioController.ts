@@ -92,7 +92,7 @@ export class UsuarioController {
 
   async listar(req: Request, res: Response){
     const users = await prisma.user.findMany();
-    return res.json({users})
+    return res.json(users )
   }
 
   async mostrarInfo(req: Request, res: Response){
@@ -259,6 +259,26 @@ export class UsuarioController {
       return res.status(201).json({message: "Endereço atualizado com sucesso"})
     }else{
       return res.status(401).json({error: "Erro ao atualizar endereço"})
+    }
+  }
+
+  async atualizarCargo(req: Request, res: Response){
+    const idPerson = Number(req.params.id)
+    const {cargo} = req.body
+
+    const user = await prisma.user.update({
+      where: {
+        id: idPerson
+      },
+      data:{
+        cargo: cargo
+      }
+    })
+
+    if(user){
+      return res.status(201).json({message: "Cargo atualizado com sucesso"})
+    }else{
+      return res.status(401).json({error: "Erro ao atualizar cargo"})
     }
   }
 }
