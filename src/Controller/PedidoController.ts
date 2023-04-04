@@ -630,9 +630,10 @@ export class PedidoController {
     }
   }
 
-  async marcarComoEnviado(req: Request, res:  Response){
+  async atualizarEnvio(req: Request, res:  Response){
     const id = Number(req.params.id)
-    const {codigo_rastreio, data_envio} = req.body
+    const today = new Date()
+    const {codigo_rastreio} = req.body
 
     const pedido = await prisma.pedido.update({
       where: {
@@ -640,7 +641,7 @@ export class PedidoController {
       },
       data: {
         status: "Enviado",
-        data_envio: data_envio,
+        data_envio: today,
         codigo_rastreio: codigo_rastreio
       }
     })
@@ -658,7 +659,42 @@ export class PedidoController {
   async capturarPagamento(req: Request, res: Response){
     const { orderID } = req.body;
     const captureData = await capturePayment(orderID);
-    // TODO: store payment information such as the transaction ID
+
+    const paypalInfo = await prisma.paypal.findFirst({
+      where: {
+        id: orderID
+      }
+    })
+
+    await prisma.paypal.update({
+      where: {
+        id: orderID
+      },
+      data: {
+        status: "Pago"
+      }
+    })
+
+    await prisma.pagamento.update({
+      where: {
+        id: paypalInfo?.pagamentoId
+      },
+      data: {
+        status: "Pago"
+      }
+    }).then(async (pagamento) => {
+      await prisma.pedido.update({
+        where: {
+          id: pagamento?.pedidoId
+        },
+        data: {
+          status: "Aguardando Envio"
+        }
+      })
+    })
+
+
+
     res.json(captureData);
   }
 }
