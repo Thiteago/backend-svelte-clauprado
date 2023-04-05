@@ -7,6 +7,7 @@ import { routerCarrinho } from "./src/Routes/CarrinhoRoute";
 import { routerPedido } from "./src/Routes/PedidoRoute";
 import { routerPagamento } from "./src/Routes/PagamentoRoute";
 import { routerPromocao } from "./src/Routes/PromocaoRoute";
+import { routerRelatorio } from "./src/Routes/RelatoriosRoute";
 
 
 const app = express();
@@ -27,6 +28,7 @@ app.use(routerCarrinho);
 app.use(routerPedido)
 app.use(routerPagamento)
 app.use(routerPromocao)
+app.use(routerRelatorio)
 app.listen(3333, () => console.log('Server is running on port 3333'));
 
 
