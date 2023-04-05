@@ -44,7 +44,6 @@ export class CarrinhoController {
           }
 
         }else{
-          console.log('to vindo aqui?')
           return res.status(400).json({message: 'Carrinho indisponível'})
         }
       })
