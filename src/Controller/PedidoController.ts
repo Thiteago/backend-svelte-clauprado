@@ -218,7 +218,6 @@ export class PedidoController {
     }
     
     if(metodoPagamento === "paypal"){
-      console.log('entrei')
       const paypalOrder = await createOrder(total)
       await prisma.pedido.create({
         data: {
@@ -644,8 +643,7 @@ export class PedidoController {
         data_envio: today,
         codigo_rastreio: codigo_rastreio
       }
-    })
-
+    })    
     if(pedido){
       return res.status(200).json({message: "Pedido marcado como enviado com sucesso"})
     }else{
@@ -665,7 +663,7 @@ export class PedidoController {
         id: orderID
       }
     })
-
+    console.log('passei aqui primeiro')
     await prisma.paypal.update({
       where: {
         id: orderID
@@ -674,13 +672,14 @@ export class PedidoController {
         status: "Pago"
       }
     })
-
+    console.log('consegui atualizar o staatus do paypal')
     await prisma.pagamento.update({
       where: {
         id: paypalInfo?.pagamentoId
       },
       data: {
-        status: "Pago"
+        status: "Pago",
+        data_pagamento: new Date()
       }
     }).then(async (pagamento) => {
       await prisma.pedido.update({
@@ -691,10 +690,18 @@ export class PedidoController {
           status: "Aguardando Envio"
         }
       })
+      //TODO: create update for alugueis too
+      await prisma.venda.updateMany({
+        where: {
+          pedidoId: pagamento?.pedidoId
+        },
+        data: {
+          status_venda: "Vendido"
+        }
+      })
     })
 
-
-
+    console.log('vim ate aqui')
     res.json(captureData);
   }
 }
@@ -702,7 +709,9 @@ export class PedidoController {
 
 async function capturePayment(orderId: any) {
   const accessToken = await generateAccessToken();
+  console.log(accessToken)
   const url = `${baseURL.sandbox}/v2/checkout/orders/${orderId}/capture`;
+  console.log(url)
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -710,7 +719,9 @@ async function capturePayment(orderId: any) {
       Authorization: `Bearer ${accessToken}`,
     },
   });
+  console.log(response)
   const data = await response.json();
+  console.log(data)
   return data;
 }
 
