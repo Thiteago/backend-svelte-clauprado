@@ -266,19 +266,29 @@ export class UsuarioController {
     const idPerson = Number(req.params.id)
     const {cargo} = req.body
 
-    const user = await prisma.user.update({
+    const userExists = await prisma.user.findUnique({
       where: {
         id: idPerson
-      },
-      data:{
-        cargo: cargo
       }
     })
+    if(userExists){
+      const user = await prisma.user.update({
+        where: {
+          id: idPerson
+        },
+        data:{
+          cargo: cargo
+        }
+      })
+      
 
-    if(user){
-      return res.status(201).json({message: "Cargo atualizado com sucesso"})
+      if(user){
+        return res.status(201).json({message: "Cargo atualizado com sucesso"})
+      }else{
+        return res.status(401).json({error: "Erro ao atualizar cargo"})
+      }
     }else{
-      return res.status(401).json({error: "Erro ao atualizar cargo"})
+      return res.status(401).json({error: "Usuario não encontrado"})
     }
   }
 }
