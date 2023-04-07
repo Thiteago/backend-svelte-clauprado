@@ -25,7 +25,6 @@ function formatDate(date: any){
 
 export class PedidoController {
   async gerar(req: Request, res: Response) {
- 
     let {total,
       tipo_frete,
       valor_frete,
@@ -34,8 +33,7 @@ export class PedidoController {
       metodoPagamento,
       enderecoDeEntrega,
       cartao,
-      vezes,
-      valor
+      vezes
     } = req.body
     let produtosAlugados = cartItens.filter((element: any) => element.Aluguel.length > 0)
     let produtosVendidos = cartItens.filter((element: any) => element.Venda.length > 0) 
@@ -46,6 +44,7 @@ export class PedidoController {
       if(produtosAlugados.length > 0) {
         produtosAlugados.forEach(async (element: any) => {
           for(let i = 0; i < element.quantidade; i++) {
+            console.log(element.Aluguel[i].dias_alugados)
             await prisma.aluguel.update({
               where: {
                 id: element.Aluguel[i].id
@@ -142,7 +141,7 @@ export class PedidoController {
           }
         })
       })
-      return res.status(200).json({message: "Pedido gerado com sucesso"})
+        return res.status(200).json({message: "Pedido gerado com sucesso"})
       })
     } 
   
@@ -281,8 +280,6 @@ export class PedidoController {
         })
           return res.status(200).json(paypalOrder)
       })
-    }else{
-      return res.status(400).json({message: "Erro ao gerar pedido"})
     }
   }
 
@@ -406,25 +403,11 @@ export class PedidoController {
     let produtosVendidosId: any = []
     let countedProdutosAlugados: any = []
     let countedProdutosVendidos: any = []
-
+    
     if(produtosAlugados.length > 0){
       for(let i = 0; i < produtosAlugados.length ; i++) {
-        await prisma.aluguel.update({
-          where: {
-            id: produtosAlugados[i],
-          },
-          data: {
-            data_aluguel: null,
-            data_expiracao: null,
-            status_aluguel: "Disponivel",
-            dias_alugados: 0,
-            tipo: "Aluguel",
-            pedidoId: null,
-            produtoId: produtosAlugados[i]
-          }
-        })
 
-        const alugueis = await prisma.aluguel.findUnique({
+        let aluguel = await prisma.aluguel.findUnique({
           where: {
             id: produtosAlugados[i]
           },
@@ -432,9 +415,34 @@ export class PedidoController {
             produto: true
           }
         })
+        if(aluguel){
+          await prisma.aluguel.update({
+            where: {
+              id: produtosAlugados[i],
+            },
+            data: {
+              data_aluguel: null,
+              data_expiracao: null,
+              status_aluguel: "Disponivel",
+              dias_alugados: 0,
+              tipo: "Aluguel",
+              pedidoId: null,
+              produtoId: aluguel.produto.id
+            }
+          })
+       
+          await prisma.pedido.update({
+            where: {
+              id: Number(req.params.id)
+            },
+            data: {
+              valor: {
+                decrement: aluguel.produto.valor * aluguel.dias_alugados
+              },
+            }
+          })
 
-        if(alugueis){
-          produtosAlugadosId = [...produtosAlugadosId, alugueis.produto.id]
+          produtosAlugadosId = [...produtosAlugadosId, aluguel.produto.id]
         }
       }
 
@@ -455,7 +463,7 @@ export class PedidoController {
           }
         })
       }
-      return res.status(200).json({message: "Produtos devolvidos com sucesso"})
+      return res.status(200).json({message: "Produtos removidos com sucesso"})
     }
     if(produtosVendidos.length > 0){
       for(let i = 0; i < produtosVendidos.length ; i++) {
@@ -468,6 +476,28 @@ export class PedidoController {
             pedidoId: null,
           }
         })
+
+        let venda = await prisma.venda.findUnique({
+          where: {
+            id: produtosVendidos[i]
+          },
+          include: {
+            produto: true
+          }
+        })
+
+        if(venda){
+          await prisma.pedido.update({
+            where: {
+              id: Number(req.params.id)
+            },
+            data: {
+              valor: {
+                decrement: venda.produto.valor
+              },
+            }
+          })
+        }
 
         const vendas = await prisma.venda.findUnique({
           where: {
@@ -663,7 +693,6 @@ export class PedidoController {
         id: orderID
       }
     })
-    console.log('passei aqui primeiro')
     await prisma.paypal.update({
       where: {
         id: orderID
@@ -672,7 +701,6 @@ export class PedidoController {
         status: "Pago"
       }
     })
-    console.log('consegui atualizar o staatus do paypal')
     await prisma.pagamento.update({
       where: {
         id: paypalInfo?.pagamentoId
@@ -701,7 +729,6 @@ export class PedidoController {
       })
     })
 
-    console.log('vim ate aqui')
     res.json(captureData);
   }
 }
@@ -709,9 +736,7 @@ export class PedidoController {
 
 async function capturePayment(orderId: any) {
   const accessToken = await generateAccessToken();
-  console.log(accessToken)
   const url = `${baseURL.sandbox}/v2/checkout/orders/${orderId}/capture`;
-  console.log(url)
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -719,9 +744,7 @@ async function capturePayment(orderId: any) {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-  console.log(response)
   const data = await response.json();
-  console.log(data)
   return data;
 }
 
