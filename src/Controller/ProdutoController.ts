@@ -272,10 +272,22 @@ export class ProdutoController{
   async excluir (req: Request, res: Response){
       const idProduto = Number(req.params.id)
 
+      await prisma.venda.deleteMany({
+        where:{
+          produtoId: idProduto
+        }
+      })
+
+      await prisma.aluguel.deleteMany({
+        where:{
+          produtoId: idProduto
+        }
+      })
+
       await prisma.produto.delete({
-          where:{
+        where:{
           id: idProduto
-          }
+        }
       })
 
       res.sendStatus(201)
