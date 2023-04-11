@@ -682,6 +682,22 @@ export class PedidoController {
   }
 
   async alterarEndereco(req: Request, res: Response){
+    const id = Number(req.params.id)
+    const enderecoId = req.body.enderecoId
+
+    const pedido = await prisma.pedido.update({
+      where: {
+        id: id
+      },
+      data: {
+        enderecoId: enderecoId
+      }
+    })
+    if(pedido){
+      return res.status(200).json({message: "Endereço alterado com sucesso"})
+    }else{
+      return res.status(404).json({message: "Nenhum pedido encontrado"})
+    }   
   }
 
   async capturarPagamento(req: Request, res: Response){
@@ -731,6 +747,7 @@ export class PedidoController {
 
     res.json(captureData);
   }
+  
 }
 
 
