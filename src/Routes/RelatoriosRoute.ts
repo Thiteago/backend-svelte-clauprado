@@ -5,3 +5,4 @@ const relatorioController = new RelatoriosController()
 export const routerRelatorio = Router();
 
 routerRelatorio.get('/relatorio/vendasDiarias', relatorioController.vendasDiarias)
+routerRelatorio.get('/relatorio/conversaoDeVendas', relatorioController.conversaoDeVendas)
