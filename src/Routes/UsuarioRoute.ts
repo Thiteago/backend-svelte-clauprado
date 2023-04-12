@@ -10,6 +10,7 @@ export const routerUser = Router();
 routerUser.post("/NovoUsuario", usuariocontroller.cadastrar);
 routerUser.post("/Autenticar", authcontroller.authenticate)
 routerUser.post('/Usuarios/:id/NovoEndereco', usuariocontroller.cadastrarNovoEndereco)
+routerUser.post('/Usuarios/visita', usuariocontroller.registrarVisita)
 
 routerUser.get('/Usuarios', usuariocontroller.listar);
 routerUser.get('/Usuarios/:id/dados', usuariocontroller.mostrarInfo)
