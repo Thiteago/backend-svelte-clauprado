@@ -291,4 +291,11 @@ export class UsuarioController {
       return res.status(401).json({error: "Usuario não encontrado"})
     }
   }
+
+  async registrarVisita(req: Request, res: Response){
+      await prisma.visit.create({
+        data:{
+        }
+      })
+    }
 }

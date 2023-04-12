@@ -175,3 +175,8 @@ model Paypal {
     pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
     pagamentoId Int        @unique
 }
+
+model Visit {
+    id   Int      @id @default(autoincrement())
+    date DateTime @default(now())
+}
