@@ -57,4 +57,45 @@ export class CarrinhoController {
       return res.status(400).json({message: 'Carrinho indisponível'})
     }
   }
+
+  async regisrarCarrinho(req: Request, res: Response) {
+    let id = req.params.id
+
+    await prisma.createdCart.create({
+      data: {
+        cartId: Number(id),
+      }
+    })
+
+    return res.status(200).json({message: 'Carrinho registrado'})
+  }
+
+  async marcarabandonado(req: Request, res: Response) {
+    let id = req.params.id
+
+    await prisma.createdCart.updateMany({
+      where: {
+        cartId: Number(id),
+        resultouVenda: false,
+      },
+      data: {
+        abandonado: true
+      }
+    })
+
+    return res.status(200).json({message: 'Carrinho marcado como abandonado'})
+  }
+
+  async marcarvendido(req: Request, res: Response) {
+    let id = req.params.id
+
+    await prisma.createdCart.updateMany({
+      where: {
+        cartId: Number(id),
+      },
+      data: {
+        resultouVenda: true
+      }
+    })
+  }
 }
