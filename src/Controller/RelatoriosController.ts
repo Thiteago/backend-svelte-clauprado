@@ -74,7 +74,7 @@ export class RelatoriosController {
     })
 
     if(!carts) return res.status(404).json({message: "Nenhum carrinho encontrado"})
-    return res.status(200).json({'carts': carts, 'cartsCount': cartsCount.length})
+    return res.status(200).json({'cartsAbandoned': carts, 'cartsCreated': cartsCount})
   }
 
   async desempenhoDeProdutos(req: Request, res: Response) {
