@@ -76,4 +76,15 @@ export class RelatoriosController {
     if(!carts) return res.status(404).json({message: "Nenhum carrinho encontrado"})
     return res.status(200).json({'carts': carts, 'cartsCount': cartsCount.length})
   }
+
+  async desempenhoDeProdutos(req: Request, res: Response) {
+    const produtos = await prisma.produto.findMany({
+      include: {
+        statisticProduct: true,
+      },
+    })
+
+    if(!produtos) return res.status(404).json({message: "Nenhum produto encontrado"})
+    return res.status(200).json(produtos)
+  }
 }
