@@ -7,8 +7,10 @@ import { routerCarrinho } from "./src/Routes/CarrinhoRoute";
 import { routerPedido } from "./src/Routes/PedidoRoute";
 import { routerPagamento } from "./src/Routes/PagamentoRoute";
 import { routerPromocao } from "./src/Routes/PromocaoRoute";
+import { scheduleAbandoned } from "./src/Routines";
 import { routerRelatorio } from "./src/Routes/RelatoriosRoute";
 
+setInterval(scheduleAbandoned, 3 * 60 * 60 * 1000)
 
 const app = express();
 
