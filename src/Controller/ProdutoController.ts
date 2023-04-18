@@ -55,7 +55,9 @@ export class ProdutoController{
             peso,
 
             statisticProduct : {
-              create: {}
+              create: {
+                totalLucro: 0,
+              }
             }
           },
         }).then(async (produtoCriado: any) => {
@@ -87,7 +89,9 @@ export class ProdutoController{
             peso,
 
             statisticProduct : {
-              create: {}
+              create: {
+                totalLucro: 0,
+              }
             }
           }
         }).then(async (produtoCriado: any) => {

@@ -64,6 +64,9 @@ export class PedidoController {
               data: {
                 qtdeAlugada: {
                   increment: 1
+                },
+                totalLucro: {
+                  increment: element.Aluguel[i].dias_alugados * element.valor 
                 }
               }
             })
@@ -90,6 +93,9 @@ export class PedidoController {
               data: {
                 qtdeVendida: {
                   increment: 1
+                },
+                totalLucro: {
+                  increment: element.valor
                 }
               }
             })
