@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { prisma } from "../utils/prisma";
-import glob from 'glob'
 
 
 export class ProdutoController{
@@ -86,7 +85,7 @@ export class ProdutoController{
             categoria,
             imagens: ids,
             peso,
-            
+
             statisticProduct : {
               create: {}
             }
@@ -108,6 +107,21 @@ export class ProdutoController{
     }else{
       return res.sendStatus(409)
     }
+  }
+
+  async marcarVisualizacao (req: Request, res: Response){
+    let idProduto = Number(req.params.id)
+
+    await prisma.statisticProduct.update({
+      where:{
+        produtoId: idProduto
+      },
+      data:{
+        qtdeVisualizada: {
+          increment: 1
+        }
+      }
+    })
   }
     
   async listar (req: Request, res: Response){
