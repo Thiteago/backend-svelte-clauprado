@@ -44,7 +44,6 @@ export class PedidoController {
       if(produtosAlugados.length > 0) {
         produtosAlugados.forEach(async (element: any) => {
           for(let i = 0; i < element.quantidade; i++) {
-            console.log(element.Aluguel[i].dias_alugados)
             await prisma.aluguel.update({
               where: {
                 id: element.Aluguel[i].id
@@ -55,6 +54,17 @@ export class PedidoController {
                 data_expiracao: formatDate(element.Aluguel[i].data_expiracao),
                 dias_alugados: element.Aluguel[i].dias_alugados,
                 status_aluguel: 'Pendente - Aguardando Pagamento',
+              }
+            })
+
+            await prisma.statisticProduct.update({
+              where: {
+                produtoId: element.id
+              },
+              data: {
+                qtdeAlugada: {
+                  increment: 1
+                }
               }
             })
           }
@@ -71,6 +81,17 @@ export class PedidoController {
               data: {
                 status_venda: 'Pendente - Aguardando Pagamento'
               } 
+            })
+
+            await prisma.statisticProduct.update({
+              where: {
+                produtoId: element.id
+              },
+              data: {
+                qtdeVendida: {
+                  increment: 1
+                }
+              }
             })
           }
         })
@@ -112,6 +133,16 @@ export class PedidoController {
               },
               data: {
                 pedidoId: pedidoCriado.id
+              }
+            })
+            await prisma.statisticProduct.update({
+              where: {
+                produtoId: element.id
+              },
+              data: {
+                qtdeAlugada: {
+                  increment: 1
+                }
               }
             })
           }
