@@ -192,11 +192,11 @@ model CreatedCart {
 }
 
 model StatisticProduct {
-  id              Int @id @default(autoincrement())
-  qtdeVendida     Int @default(0)
-  qtdeAlugada     Int @default(0)
-  qtdeVisualizada Int @default(0)
-  qtdeEmPromocao  Int @default(0)
+  id              Int   @id @default(autoincrement())
+  qtdeVendida     Int   @default(0)
+  qtdeAlugada     Int   @default(0)
+  qtdeVisualizada Int   @default(0)
+  totalLucro      Float
 
   produto   Produto @relation(fields: [produtoId], references: [id])
   produtoId Int     @unique
