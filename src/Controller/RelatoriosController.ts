@@ -55,4 +55,25 @@ export class RelatoriosController {
     return res.json({'pedido': pedidos, 'visitas': visitas});
   }
 
+  async carrinhosAbandonados(req: Request, res: Response) {
+    const carts = await prisma.createdCart.findMany({
+      where: {
+        date: {
+          gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
+        },
+        abandonado: true,
+      },
+    });
+
+    const cartsCount = await prisma.createdCart.findMany({
+      where: {
+        date: {
+          gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
+        },
+      }
+    })
+
+    if(!carts) return res.status(404).json({message: "Nenhum carrinho encontrado"})
+    return res.status(200).json({'carts': carts, 'cartsCount': cartsCount.length})
+  }
 }
