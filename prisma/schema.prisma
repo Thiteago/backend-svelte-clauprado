@@ -2,181 +2,202 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-    id             Int     @id @default(autoincrement())
-    nome           String
-    dataNascimento String?
-    email          String  @unique
-    senha          String
-    cpf            String  @unique
-    numeroTel      String?
-    numeroCel      String
-    cargo          String  @default("Usuario")
-    status         String  @default("Ativo")
+  id             Int     @id @default(autoincrement())
+  nome           String
+  dataNascimento String?
+  email          String  @unique
+  senha          String
+  cpf            String  @unique
+  numeroTel      String?
+  numeroCel      String
+  cargo          String  @default("Usuario")
+  status         String  @default("Ativo")
 
-    pedidos   Pedido[]
-    enderecos Endereco[]
+  pedidos   Pedido[]
+  enderecos Endereco[]
 }
 
 model Endereco {
-    id        Int     @id @default(autoincrement())
-    rua       String
-    numeroRua String
-    bairro    String
-    cidade    String
-    cep       String
-    estado    String
-    principal Boolean @default(false)
+  id        Int     @id @default(autoincrement())
+  rua       String
+  numeroRua String
+  bairro    String
+  cidade    String
+  cep       String
+  estado    String
+  principal Boolean @default(false)
 
-    user   User @relation(fields: [userId], references: [id])
-    userId Int
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
 
-    pedido Pedido[]
+  pedido Pedido[]
 }
 
 model Produto {
-    id                  Int      @id @default(autoincrement())
-    nome                String
-    descricao           String
-    dataFabricacao      DateTime
-    dataPublicacao      DateTime @default(now())
-    quantidadeEmEstoque Int      @default(1)
-    peso                Float
-    valor               Float
-    altura              String
-    largura             String
-    comprimento         String
-    material            String
-    categoria           String
-    imagens             String[]
+  id                  Int      @id @default(autoincrement())
+  nome                String
+  descricao           String
+  dataFabricacao      DateTime
+  dataPublicacao      DateTime @default(now())
+  quantidadeEmEstoque Int      @default(1)
+  peso                Float
+  valor               Float
+  altura              String
+  largura             String
+  comprimento         String
+  material            String
+  categoria           String
+  imagens             String[]
 
-    Aluguel Aluguel[]
-    Venda   Venda[]
+  Aluguel Aluguel[]
+  Venda   Venda[]
 
-    promocao   Promocao? @relation(fields: [promocaoId], references: [id])
-    promocaoId Int?
+  promocao   Promocao? @relation(fields: [promocaoId], references: [id])
+  promocaoId Int?
+
+  statisticProduct StatisticProduct?
 }
 
 model Promocao {
-    id             Int      @id @default(autoincrement())
-    nome           String
-    data_inicio    DateTime @default(now())
-    data_fim       DateTime
-    categorias     String[]
-    valor_desconto Float
-    tipo           String   @default("porcentual")
-    status         String   @default("Ativo")
+  id             Int      @id @default(autoincrement())
+  nome           String
+  data_inicio    DateTime @default(now())
+  data_fim       DateTime
+  categorias     String[]
+  valor_desconto Float
+  tipo           String   @default("porcentual")
+  status         String   @default("Ativo")
 
-    produtos Produto[]
+  produtos Produto[]
 }
 
 model Aluguel {
-    id                   Int       @id @default(autoincrement())
-    data_aluguel         DateTime?
-    data_disponibilidade DateTime  @default(now())
-    data_expiracao       DateTime?
-    status_aluguel       String    @default("Disponivel")
-    dias_alugados        Int       @default(0)
-    tipo                 String    @default("Aluguel")
+  id                   Int       @id @default(autoincrement())
+  data_aluguel         DateTime?
+  data_disponibilidade DateTime  @default(now())
+  data_expiracao       DateTime?
+  status_aluguel       String    @default("Disponivel")
+  dias_alugados        Int       @default(0)
+  tipo                 String    @default("Aluguel")
 
-    produto   Produto @relation(fields: [produtoId], references: [id])
-    produtoId Int
-    Pedido    Pedido? @relation(fields: [pedidoId], references: [id])
-    pedidoId  Int?
+  produto   Produto @relation(fields: [produtoId], references: [id])
+  produtoId Int
+  Pedido    Pedido? @relation(fields: [pedidoId], references: [id])
+  pedidoId  Int?
 }
 
 model Venda {
-    id           Int    @id @default(autoincrement())
-    tipo         String @default("Venda")
-    status_venda String @default("Disponivel")
+  id           Int    @id @default(autoincrement())
+  tipo         String @default("Venda")
+  status_venda String @default("Disponivel")
 
-    pedido   Pedido? @relation(fields: [pedidoId], references: [id])
-    pedidoId Int?
+  pedido   Pedido? @relation(fields: [pedidoId], references: [id])
+  pedidoId Int?
 
-    produto   Produto @relation(fields: [produtoId], references: [id])
-    produtoId Int
+  produto   Produto @relation(fields: [produtoId], references: [id])
+  produtoId Int
 }
 
 model Pedido {
-    id              Int       @id @default(autoincrement())
-    data_pedido     DateTime  @default(now())
-    status          String    @default("Pendente")
-    valor           Float
-    tipo_frete      String    @default("PAC")
-    valor_frete     Float
-    data_envio      DateTime?
-    codigo_rastreio String?
+  id              Int       @id @default(autoincrement())
+  data_pedido     DateTime  @default(now())
+  status          String    @default("Pendente")
+  valor           Float
+  tipo_frete      String    @default("PAC")
+  valor_frete     Float
+  data_envio      DateTime?
+  codigo_rastreio String?
 
-    user   User @relation(fields: [userId], references: [id])
-    userId Int
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
 
-    vendas    Venda[]
-    alugueis  Aluguel[]
-    Pagamento Pagamento?
+  vendas    Venda[]
+  alugueis  Aluguel[]
+  Pagamento Pagamento?
 
-    endereco   Endereco @relation(fields: [enderecoId], references: [id])
-    enderecoId Int
+  endereco   Endereco @relation(fields: [enderecoId], references: [id])
+  enderecoId Int
 }
 
 model Pagamento {
-    id              Int       @id @default(autoincrement())
-    data_pagamento  DateTime?
-    valor           Float
-    forma_pagamento String
-    status          String    @default("Pendente")
-    vezes           String    @default("A vista")
+  id              Int       @id @default(autoincrement())
+  data_pagamento  DateTime?
+  valor           Float
+  forma_pagamento String
+  status          String    @default("Pendente")
+  vezes           String    @default("A vista")
 
-    pedido   Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-    pedidoId Int    @unique
+  pedido   Pedido @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  pedidoId Int    @unique
 
-    boleto Boleto?
-    cartao Cartao?
-    paypal Paypal?
+  boleto Boleto?
+  cartao Cartao?
+  paypal Paypal?
 }
 
 model Boleto {
-    id             Int      @id @default(autoincrement())
-    data_venc      DateTime
-    valor          Float
-    status         String   @default("Pendente")
-    linhaDigitavel String
-    numeroBoleto   String
-    nomePDF        String
+  id             Int      @id @default(autoincrement())
+  data_venc      DateTime
+  valor          Float
+  status         String   @default("Pendente")
+  linhaDigitavel String
+  numeroBoleto   String
+  nomePDF        String
 
-    pagamento   Pagamento @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
-    pagamentoId Int       @unique
+  pagamento   Pagamento @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
+  pagamentoId Int       @unique
 }
 
 model Cartao {
-    id          Int      @id @default(autoincrement())
-    numero      String
-    nome        String
-    validade    String
-    bandeira    String
-    data_criado DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  numero      String
+  nome        String
+  validade    String
+  bandeira    String
+  data_criado DateTime @default(now())
 
-    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
-    pagamentoId Int        @unique
+  pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
+  pagamentoId Int        @unique
 }
 
 model Paypal {
-    id     String @id
-    status String
-    link   String
+  id     String @id
+  status String
+  link   String
 
-    pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
-    pagamentoId Int        @unique
+  pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
+  pagamentoId Int        @unique
 }
 
 model Visit {
-    id   Int      @id @default(autoincrement())
-    date DateTime @default(now())
+  id   Int      @id @default(autoincrement())
+  date DateTime @default(now())
+}
+
+model CreatedCart {
+  id            Int      @id @default(autoincrement())
+  date          DateTime @default(now())
+  cartId        Int
+  abandonado    Boolean  @default(false)
+  resultouVenda Boolean  @default(false)
+}
+
+model StatisticProduct {
+  id              Int @id @default(autoincrement())
+  qtdeVendida     Int @default(0)
+  qtdeAlugada     Int @default(0)
+  qtdeVisualizada Int @default(0)
+  qtdeEmPromocao  Int @default(0)
+
+  produto   Produto @relation(fields: [produtoId], references: [id])
+  produtoId Int     @unique
 }
