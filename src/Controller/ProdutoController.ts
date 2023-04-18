@@ -53,7 +53,11 @@ export class ProdutoController{
             material ,
             categoria,
             imagens: ids,
-            peso
+            peso,
+
+            statisticProduct : {
+              create: {}
+            }
           },
         }).then(async (produtoCriado: any) => {
           for(let i = 0; i < parseInt(quantidade); i++) {
@@ -82,6 +86,10 @@ export class ProdutoController{
             categoria,
             imagens: ids,
             peso,
+            
+            statisticProduct : {
+              create: {}
+            }
           }
         }).then(async (produtoCriado: any) => {
           for(let i = 0; i < parseInt(quantidade); i++) {
