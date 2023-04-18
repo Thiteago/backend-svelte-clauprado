@@ -11,6 +11,7 @@ export const routerProduto = Router();
 
 
 routerProduto.post("/Produto/Cadastrar",upload.array('imagens', 4), produtocontroller.cadastrar);
+routerProduto.post("/Produto/Visualizou/:id", produtocontroller.marcarVisualizacao)
 
 routerProduto.get("/Produto", produtocontroller.listar);
 routerProduto.get("/Produto/:id", produtocontroller.listarpeloid)
