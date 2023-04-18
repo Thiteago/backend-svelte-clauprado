@@ -196,7 +196,7 @@ model StatisticProduct {
   qtdeVendida     Int   @default(0)
   qtdeAlugada     Int   @default(0)
   qtdeVisualizada Int   @default(0)
-  totalLucro      Float
+  totalLucro      Float @default(0)
 
   produto   Produto @relation(fields: [produtoId], references: [id])
   produtoId Int     @unique
