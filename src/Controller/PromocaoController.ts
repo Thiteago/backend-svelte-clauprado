@@ -85,4 +85,19 @@ export class PromocaoController {
     }
     return res.status(200).json(promocao)
   }
+
+  async listarPromocaoAtiva(req: Request, res: Response) {
+    const promocoes = await prisma.promocao.findMany({
+      where: {
+        status: "Ativo"
+      },
+      include: {
+        produtos: true
+      }
+    })
+    if(!promocoes || promocoes.length === 0) {
+      return res.status(400).json({error: 'Erro ao listar promoções'})
+    }
+    return res.json(promocoes)
+  }
 }
