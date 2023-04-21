@@ -10,8 +10,7 @@ import { routerPromocao } from "./src/Routes/PromocaoRoute";
 import { scheduleAbandoned } from "./src/Routines";
 import { routerRelatorio } from "./src/Routes/RelatoriosRoute";
 import { routerDespesas } from "./src/Routes/DespesasRoute";
-
-const rateLimit = require("express-rate-limit");
+import { rateLimit } from "express-rate-limit";
 
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000, 
