@@ -295,7 +295,9 @@ export class UsuarioController {
   async registrarVisita(req: Request, res: Response){
       await prisma.visit.create({
         data:{
+          date: new Date(),
         }
       })
+      return res.status(201).json({message: "Visita registrada com sucesso"})
     }
 }
