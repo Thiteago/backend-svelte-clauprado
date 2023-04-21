@@ -9,6 +9,7 @@ import { routerPagamento } from "./src/Routes/PagamentoRoute";
 import { routerPromocao } from "./src/Routes/PromocaoRoute";
 import { scheduleAbandoned } from "./src/Routines";
 import { routerRelatorio } from "./src/Routes/RelatoriosRoute";
+import { routerDespesas } from "./src/Routes/DespesasRoute";
 
 const rateLimit = require("express-rate-limit");
 
@@ -42,6 +43,7 @@ app.use(routerPedido)
 app.use(routerPagamento)
 app.use(routerPromocao)
 app.use(routerRelatorio)
+app.use(routerDespesas)
 app.listen(3333, () => console.log('Server is running on port 3333'));
 
 
