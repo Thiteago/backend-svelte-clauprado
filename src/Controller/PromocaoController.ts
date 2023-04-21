@@ -6,6 +6,8 @@ export class PromocaoController {
     let { nome, valor_desconto, data_inicio, data_fim, tipo,categorias, produtos} = req.body;
     let produtosPorCategoria = []
     let produtosPorId:any = []
+    let today = new Date()
+    let isAgendado = new Date(data_inicio) > today ? true : false
 
     valor_desconto = valor_desconto.replace('%','')
     valor_desconto = valor_desconto.replace('R$','')
@@ -44,6 +46,7 @@ export class PromocaoController {
         tipo,
         categorias,
         valor_desconto,
+        status: isAgendado ? "Agendado" : "Ativo",
         produtos: {
           connect: produtosPorId.map((id: any) => ({ id: Number(id) }))
         }
@@ -99,5 +102,18 @@ export class PromocaoController {
       return res.status(400).json({error: 'Erro ao listar promoções'})
     }
     return res.json(promocoes)
+  }
+
+  async excluir(req: Request, res: Response) {
+    const id = Number(req.params.id)
+    const promocao = await prisma.promocao.delete({
+      where: {
+        id
+      }
+    })
+    if(!promocao) {
+      return res.status(400).json({error: 'Erro ao excluir promoção'})
+    }
+    return res.status(200).json(promocao)
   }
 }
