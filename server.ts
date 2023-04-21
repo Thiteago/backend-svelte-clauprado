@@ -10,6 +10,16 @@ import { routerPromocao } from "./src/Routes/PromocaoRoute";
 import { scheduleAbandoned } from "./src/Routines";
 import { routerRelatorio } from "./src/Routes/RelatoriosRoute";
 
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+  windowMs: 5 * 60 * 1000, 
+  max: 100, 
+  message: "Too many requests from this IP, please try again later.",
+});
+
+
+
 setInterval(scheduleAbandoned, 3 * 60 * 60 * 1000)
 
 const app = express();
@@ -24,6 +34,7 @@ const corsOptions = {
 app.use("/static", express.static(path.resolve(__dirname, "public","uploads")))
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use(limiter);
 app.use(routerUser);
 app.use(routerProduto);
 app.use(routerCarrinho);
