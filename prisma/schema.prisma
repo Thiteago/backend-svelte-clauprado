@@ -201,3 +201,13 @@ model StatisticProduct {
   produto   Produto @relation(fields: [produtoId], references: [id])
   produtoId Int     @unique
 }
+
+model Despesas {
+  id                Int      @id @default(autoincrement())
+  data              DateTime @default(now())
+  valor             Float
+  descricao         String
+  tipoDespesa       String
+  recorrente        Boolean  @default(false)
+  tipoDeRecorrencia String?
+}
