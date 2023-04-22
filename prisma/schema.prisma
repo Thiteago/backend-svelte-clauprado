@@ -58,6 +58,8 @@ model Produto {
   material            String
   categoria           String
   imagens             String[]
+  tipo                String
+  status              String   @default("Ativo")
 
   Aluguel Aluguel[]
   Venda   Venda[]
