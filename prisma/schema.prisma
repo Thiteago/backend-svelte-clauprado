@@ -183,8 +183,9 @@ model Paypal {
 }
 
 model Visit {
-  id   Int      @id @default(autoincrement())
-  date DateTime @default(now())
+  id     Int      @id @default(autoincrement())
+  date   DateTime @default(now())
+  logado Boolean  @default(false)
 }
 
 model CreatedCart {
