@@ -25,6 +25,137 @@ export async function scheduleAbandoned(){
       })
     })
   }
+  console.log('Verificação concluída!')
+}
 
+export async function scheduleDailyDespesas(){
+  console.log('Verificando despesas recorrentes diarias...')
+  const despesas = await prisma.despesas.findMany({
+    where: {
+      recorrente: true,
+      tipoDeRecorrencia: 'dia',
+      data: {
+        lte: new Date()
+      }
+    }
+  })
+
+  if(despesas.length > 0){
+    despesas.forEach(async despesa => {
+      await prisma.despesas.create({
+        data: {
+          valor: despesa.valor,
+          descricao: despesa.descricao,
+          tipoDespesa: despesa.tipoDespesa,
+          recorrente: despesa.recorrente,
+          tipoDeRecorrencia: despesa.tipoDeRecorrencia,
+          data: new Date()
+        }
+      })
+    })
+  }
+  console.log('Verificação concluída!')
+}
+
+export async function scheduleMonthlyDespesas(){
+  console.log('Verificando despesas recorrentes mensais...')
+  
+  const despesas = await prisma.despesas.findMany({
+    where: {
+      recorrente: true,
+      tipoDeRecorrencia: 'mes',
+      data: {
+        lte: new Date()
+      }
+    }
+  })
+
+  if(despesas.length > 0){
+    despesas.forEach(async despesa => {
+      //check if despesa already exists in this month
+      const despesaExists = await prisma.despesas.findFirst({
+        where: {
+          AND: [
+            {
+              recorrente: true,
+              tipoDeRecorrencia: 'mes',
+              data: {
+                gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+                lte: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+              }
+            },
+            {
+              tipoDespesa: despesa.tipoDespesa
+            }
+          ]
+        }
+      })
+
+      if(!despesaExists){
+        await prisma.despesas.create({
+          data: {
+            valor: despesa.valor,
+            descricao: despesa.descricao,
+            tipoDespesa: despesa.tipoDespesa,
+            recorrente: despesa.recorrente,
+            tipoDeRecorrencia: despesa.tipoDeRecorrencia,
+            data: new Date()
+          }
+        })
+      }
+    })
+  }
+  console.log('Verificação concluída!')
+}
+
+export async function scheduleYearlyDespesas(){
+  console.log('Verificando despesas recorrentes anuais...')
+
+  const despesas = await prisma.despesas.findMany({
+    where: {
+      recorrente: true,
+      tipoDeRecorrencia: 'ano',
+      data: {
+        lte: new Date()
+      }
+    }
+  })
+
+  if(despesas.length > 0){
+    despesas.forEach(async despesa => {
+      //check if despesa already exists in this year
+      const despesaExists = await prisma.despesas.findFirst({
+        where: {
+          AND: [
+            {
+              recorrente: true,
+              tipoDeRecorrencia: 'ano',
+              data: {
+                gte: new Date(new Date().getFullYear(), 0, 1),
+                lte: new Date(new Date().getFullYear(), 11, 31)
+              }
+            },
+            {
+              tipoDespesa: despesa.tipoDespesa
+            }
+          ]
+        }
+      })
+
+      if(!despesaExists){
+        await prisma.despesas.create({
+          data: {
+            valor: despesa.valor,
+            descricao: despesa.descricao,
+            tipoDespesa: despesa.tipoDespesa,
+            recorrente: despesa.recorrente,
+            tipoDeRecorrencia: despesa.tipoDeRecorrencia,
+            data: new Date()
+          }
+        })
+      }
+    })
+  }
+  console.log('Verificação concluída!')
 }
 
