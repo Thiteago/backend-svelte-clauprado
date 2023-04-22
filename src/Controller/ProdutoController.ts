@@ -70,7 +70,7 @@ export class ProdutoController{
               }
             })
           }
-          res.sendStatus(201)
+          res.status(201).json('Sucesso')
         })
       }else{
         await prisma.produto.create({
@@ -105,11 +105,11 @@ export class ProdutoController{
               }
             })
           }
-          res.sendStatus(201)
+          res.status(201).json('Sucesso')
         })
       }
     }else{
-      return res.sendStatus(409)
+      return res.status(409).json('Sucesso')
     }
   }
 
@@ -224,6 +224,7 @@ export class ProdutoController{
       });
 
       if(tipo == 'Aluguel' && oldProduct){
+        console.log(oldProduct)
         if(oldProduct.Aluguel.length > 0 && oldProduct.quantidadeEmEstoque == 0 && quantidade > 0){
           for(let i = 0; i < parseInt(quantidade); i++) {
             await prisma.aluguel.create({
@@ -288,10 +289,10 @@ export class ProdutoController{
           }
         }
       }
-      return res.sendStatus(201);
+      return res.status(201).json('Sucesso');
     } catch (error) {
       console.error(error);
-      return res.sendStatus(500);
+      return res.status(500).json('Sucesso');
     }
   }
 
@@ -316,7 +317,7 @@ export class ProdutoController{
         }
       })
 
-      res.sendStatus(201)
+      res.status(201).json('Sucesso')
   }
 
   async listarpeloid (req: Request, res: Response){
