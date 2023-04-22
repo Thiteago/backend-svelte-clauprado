@@ -107,6 +107,6 @@ export class DespesasController {
     if(!despesa) {
       return res.status(400).json({error: 'Erro ao deletar despesa'})
     }
-    return res.status(201)
+    return res.status(201).json({despesa})
   }
 }
