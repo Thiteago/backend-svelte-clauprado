@@ -1,16 +1,21 @@
 import express from "express"
 import cors from "cors"
+import cron from "node-cron"
+import path from 'path'
+import { rateLimit } from "express-rate-limit";
 import { routerUser } from "./src/Routes/UsuarioRoute";
 import { routerProduto } from "./src/Routes/ProdutoRoute";
-import path from 'path'
 import { routerCarrinho } from "./src/Routes/CarrinhoRoute";
 import { routerPedido } from "./src/Routes/PedidoRoute";
 import { routerPagamento } from "./src/Routes/PagamentoRoute";
 import { routerPromocao } from "./src/Routes/PromocaoRoute";
-import { scheduleAbandoned } from "./src/Routines";
 import { routerRelatorio } from "./src/Routes/RelatoriosRoute";
 import { routerDespesas } from "./src/Routes/DespesasRoute";
-import { rateLimit } from "express-rate-limit";
+import { routerAvaliacoes } from "./src/Routes/AvaliacoesRoute";
+
+import { scheduleAbandoned, scheduleDailyDespesas ,scheduleMonthlyDespesas , scheduleYearlyDespesas } 
+from "./src/Routines";
+
 
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000, 
@@ -19,8 +24,22 @@ const limiter = rateLimit({
 });
 
 
+cron.schedule('0 0 * * *', () => {
+  scheduleDailyDespesas()
+})
 
-setInterval(scheduleAbandoned, 3 * 60 * 60 * 1000)
+cron.schedule('*/15 * * * *', () => {
+  scheduleAbandoned()
+})
+
+cron.schedule('0 0 1 * *', () => {
+  scheduleMonthlyDespesas()
+})
+
+cron.schedule('0 0 1 1 *', () => {
+  scheduleYearlyDespesas()
+})
+
 
 const app = express();
 
@@ -43,6 +62,7 @@ app.use(routerPagamento)
 app.use(routerPromocao)
 app.use(routerRelatorio)
 app.use(routerDespesas)
+app.use(routerAvaliacoes)
 app.listen(3333, () => console.log('Server is running on port 3333'));
 
 
