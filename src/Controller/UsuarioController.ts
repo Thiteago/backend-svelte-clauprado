@@ -293,11 +293,22 @@ export class UsuarioController {
   }
 
   async registrarVisita(req: Request, res: Response){
+    let logado = req.params
+    if(logado){
+    await prisma.visit.create({
+      data:{
+        date: new Date(),
+        logado: true,
+      }
+    })
+    }else{
       await prisma.visit.create({
         data:{
           date: new Date(),
+          logado: false,
         }
       })
-      return res.status(201).json({message: "Visita registrada com sucesso"})
     }
+    return res.status(201).json({message: "Visita registrada com sucesso"})
+  }
 }
