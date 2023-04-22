@@ -53,6 +53,7 @@ export class ProdutoController{
             categoria,
             imagens: ids,
             peso,
+            tipo,
 
             statisticProduct : {
               create: {
@@ -87,6 +88,7 @@ export class ProdutoController{
             categoria,
             imagens: ids,
             peso,
+            tipo,
 
             statisticProduct : {
               create: {
@@ -130,6 +132,9 @@ export class ProdutoController{
     
   async listar (req: Request, res: Response){
     let produtos: any = await prisma.produto.findMany({
+      where:{
+        status: "Ativo"
+      },
       include:{
         Venda: {
           where:{
@@ -152,6 +157,7 @@ export class ProdutoController{
     const idProduto = Number(req.params.id)
     let ids: Array<string> = [];
     let myfiles = JSON.parse(JSON.stringify(req.files))
+    let diferenca
       
     myfiles.map((item: any) => {
       ids.push(item.filename)
@@ -224,72 +230,368 @@ export class ProdutoController{
       });
 
       if(tipo == 'Aluguel' && oldProduct){
-        console.log(oldProduct)
-        if(oldProduct.Aluguel.length > 0 && oldProduct.quantidadeEmEstoque == 0 && quantidade > 0){
-          for(let i = 0; i < parseInt(quantidade); i++) {
-            await prisma.aluguel.create({
-              data:{
-                data_disponibilidade: new Date(),
-                status_aluguel: 'Disponivel',
-                tipo: 'Aluguel',
-
-                produtoId: idProduto
-              }
-            })
-          }
-        }else if(oldProduct.Aluguel.length == 0 && oldProduct.Venda.length > 0){
-          for(let i = 0; i < parseInt(quantidade); i++) {
-            await prisma.venda.delete({
-              where: {
-                id: oldProduct.Venda[i].id
+        if(quantidade > 0 && quantidade > oldProduct.quantidadeEmEstoque){
+          if(oldProduct.tipo == 'Aluguel'){
+            diferenca = quantidade - oldProduct.quantidadeEmEstoque
+            for(let i = 0; i < diferenca; i++) {
+              await prisma.aluguel.create({
+                data:{
+                  data_disponibilidade: new Date(),
+                  status_aluguel: 'Disponivel',
+                  tipo: 'Aluguel',
+                  produtoId: idProduto
+                }
+              })
+            }
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
               },
-            })
+            });
+          }else if(oldProduct.tipo == 'Venda'){
+            for(let i = 0; i < oldProduct.quantidadeEmEstoque; i++) {
+              let willDeleted = await prisma.venda.findFirst({
+                where:{
+                  produtoId: idProduto
+                }
+              })
+              await prisma.venda.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+            for(let i = 0; i < parseInt(quantidade); i++) {
+              await prisma.aluguel.create({
+                data:{
+                  data_disponibilidade: new Date(),
+                  status_aluguel: 'Disponivel',
+                  tipo: 'Aluguel',
+                  produtoId: idProduto
+                }
+              })
+            }
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+              },
+            });
           }
-          for(let i = 0; i < parseInt(quantidade); i++) {
-            await prisma.aluguel.create({
-              data:{
-                data_disponibilidade: new Date(),
-                status_aluguel: 'Disponivel',
-                tipo: 'Aluguel',
+        }else if(quantidade > 0 && quantidade < oldProduct.quantidadeEmEstoque){
+          if(oldProduct.tipo == 'Aluguel'){
+            diferenca = oldProduct.quantidadeEmEstoque - quantidade
+            for(let i = 0; i < diferenca; i++) {
+              let willDeleted = await prisma.aluguel.findFirst({
+                where:{
+                  produtoId: idProduto,
+                  status_aluguel: 'Disponivel'
+                }
+              })
+              await prisma.aluguel.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+              },
+            });
+          }else if(oldProduct.tipo == 'Venda'){
+            for(let i = 0; i < oldProduct.quantidadeEmEstoque; i++) {
+              let willDeleted = await prisma.venda.findFirst({
+                where:{
+                  produtoId: idProduto,
+                  status_venda: 'Disponivel'
+                }
+              })
+              await prisma.venda.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+            for(let i = 0; i < parseInt(quantidade); i++) {
+              await prisma.aluguel.create({
+                data:{
+                  data_disponibilidade: new Date(),
+                  status_aluguel: 'Disponivel',
+                  tipo: 'Aluguel',
+                  produtoId: idProduto
+                }
+              })
+            }
 
-                produtoId: idProduto
-              }
-            })
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+              },
+            });
+          }
+        }else if(quantidade == 0){
+          if(oldProduct.tipo == 'Aluguel'){
+            for(let i = 0; i < oldProduct.Aluguel.length; i++) {
+              let willDeleted = await prisma.aluguel.findFirst({
+                where:{
+                  produtoId: idProduto,
+                  status_aluguel: 'Disponivel'
+                }
+              })
+              await prisma.aluguel.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+              },
+            });
+          }else if(oldProduct.tipo == 'Venda'){
+            for(let i = 0; i < oldProduct.Venda.length; i++) {
+              let willDeleted = await prisma.venda.findFirst({
+                where:{
+                  produtoId: idProduto,
+                  status_venda: 'Disponivel'
+                }
+              })
+              await prisma.venda.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+              },
+            });
+          }
+        }else if (quantidade == oldProduct.quantidadeEmEstoque){
+          if(oldProduct.tipo != 'Aluguel'){
+            for(let i = 0; i < oldProduct.quantidadeEmEstoque; i++) {
+              let willDeleted = await prisma.venda.findFirst({
+                where:{
+                  produtoId: idProduto,
+                  status_venda: 'Disponivel'
+                }
+              })
+              await prisma.venda.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+            for(let i = 0; i < parseInt(quantidade); i++) {
+              await prisma.aluguel.create({
+                data:{
+                  data_disponibilidade: new Date(),
+                  status_aluguel: 'Disponivel',
+                  tipo: 'Aluguel',
+                  produtoId: idProduto
+                }
+              })
+            }
+
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+                tipo: 'Aluguel'
+              },
+            });
           }
         }
+        return res.status(201).json('Sucesso');
       }else if(tipo == 'Venda' && oldProduct){
-        if(oldProduct.Venda.length > 0 && oldProduct.quantidadeEmEstoque == 0 && quantidade > 0){
-          for(let i = 0; i < parseInt(quantidade); i++) {
-            await prisma.venda.create({
-              data:{
-                status_venda: 'Disponivel',
-                tipo: 'Venda',
+        if(quantidade > 0 && quantidade > oldProduct.quantidadeEmEstoque){
+          if(oldProduct.tipo == 'Aluguel'){
+            for(let i = 0; i < oldProduct.quantidadeEmEstoque; i++) {
+              let willDeleted = await prisma.aluguel.findFirst({
+                where:{
+                  produtoId: idProduto
+                }
+              })
 
-                produtoId: idProduto
-              }
-            })
-          }
-        }else if(oldProduct.Venda.length == 0 && oldProduct.Aluguel.length > 0){
-          for(let i = 0; i < parseInt(quantidade); i++) {
-            await prisma.aluguel.delete({
-              where: {
-                id: oldProduct.Aluguel[i].id
+              await prisma.aluguel.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+            for(let i = 0; i < parseInt(quantidade); i++) {
+              await prisma.venda.create({
+                data:{
+                  status_venda: 'Disponivel',
+                  tipo: 'Venda',
+                  produtoId: idProduto
+                }
+              })
+            }
+
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+                tipo: 'Venda'
               },
-            })
-          }
-          for(let i = 0; i < parseInt(quantidade); i++) {
-            await prisma.venda.create({
-              data:{
-                status_venda: 'Disponivel',
-                tipo: 'Venda',
+            });
+          }else if(oldProduct.tipo == 'Venda'){
+            diferenca = quantidade - oldProduct.quantidadeEmEstoque
+            for(let i = 0; i < diferenca; i++) {
+              await prisma.venda.create({
+                data:{
+                  status_venda: 'Disponivel',
+                  tipo: 'Venda',
+                  produtoId: idProduto
+                }
+              })
+            }
 
-                produtoId: idProduto
-              }
-            })
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+              },
+            });
+          }
+        }else if(quantidade > 0 && quantidade < oldProduct.quantidadeEmEstoque){
+          if(oldProduct.tipo == 'Aluguel'){
+            for(let i = 0; i < oldProduct.quantidadeEmEstoque; i++) {
+              let  willDeleted = await prisma.aluguel.findFirst({
+                where:{
+                  produtoId: idProduto
+                }
+              })
+
+              await prisma.aluguel.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+            for(let i = 0; i < parseInt(quantidade); i++) {
+              await prisma.venda.create({
+                data:{
+                  status_venda: 'Disponivel',
+                  tipo: 'Venda',
+                  produtoId: idProduto
+                }
+              })
+            }
+
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+                tipo: 'Venda'
+              },
+            });
+          }else if(oldProduct.tipo == 'Venda'){
+            diferenca = oldProduct.quantidadeEmEstoque - quantidade
+            for(let i = 0; i < diferenca; i++) {
+              let willDeleted = await prisma.venda.findFirst({
+                where:{
+                  produtoId: idProduto,
+                  status_venda: 'Disponivel'
+                }
+              })
+              await prisma.venda.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+              },
+            });
+          }
+        }else if(quantidade == 0){
+          if(oldProduct.tipo == 'Aluguel'){
+            for(let i = 0; i < oldProduct.Aluguel.length; i++) {
+              let willDeleted = await prisma.aluguel.findFirst({
+                where:{
+                  produtoId: idProduto,
+                  status_aluguel: 'Disponivel'
+                }
+              })  
+              await prisma.aluguel.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+          }else if(oldProduct.tipo == 'Venda'){
+            for(let i = 0; i < oldProduct.Venda.length; i++) {
+              let willDeleted = await prisma.venda.findFirst({
+                where:{
+                  produtoId: idProduto,
+                  status_venda: 'Disponivel'
+                }
+              })
+
+              await prisma.venda.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+          }
+          await prisma.produto.update({
+            where: { id: idProduto },
+            data: {
+              quantidadeEmEstoque: parseInt(quantidade),
+              tipo: 'Venda'
+            },
+          });
+        }else if (quantidade == oldProduct.quantidadeEmEstoque){
+          if(oldProduct.tipo != 'Venda'){
+            for(let i = 0; i < oldProduct.quantidadeEmEstoque; i++) {
+              let willDeleted = await prisma.aluguel.findFirst({
+                where:{
+                  produtoId: idProduto,
+                  status_aluguel: 'Disponivel'
+                }
+              })
+              await prisma.aluguel.delete({
+                where: {
+                  id: willDeleted?.id
+                },
+              })
+            }
+            for(let i = 0; i < parseInt(quantidade); i++) {
+              await prisma.venda.create({
+                data:{
+                  status_venda: 'Disponivel',
+                  produtoId: idProduto
+                }
+              })
+            }
+            await prisma.produto.update({
+              where: { id: idProduto },
+              data: {
+                quantidadeEmEstoque: parseInt(quantidade),
+                tipo: 'Venda'
+              },
+            });
           }
         }
+        return res.status(201).json('Sucesso');
       }
-      return res.status(201).json('Sucesso');
     } catch (error) {
       console.error(error);
       return res.status(500).json('Sucesso');
@@ -300,21 +602,24 @@ export class ProdutoController{
       const idProduto = Number(req.params.id)
 
       await prisma.venda.deleteMany({
-        where:{
-          produtoId: idProduto
+        where: {
+          produtoId: idProduto,
+          status_venda: 'Disponivel'
         }
       })
 
       await prisma.aluguel.deleteMany({
-        where:{
-          produtoId: idProduto
+        where: {
+          produtoId: idProduto,
+          status_aluguel: 'Disponivel'
         }
       })
 
-      await prisma.produto.delete({
-        where:{
-          id: idProduto
-        }
+      await prisma.produto.update({
+        where: { id: idProduto },
+        data: {
+          status: 'Inativo',
+        },
       })
 
       res.status(201).json('Sucesso')
