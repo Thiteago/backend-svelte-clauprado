@@ -159,3 +159,55 @@ export async function scheduleYearlyDespesas(){
   console.log('Verificação concluída!')
 }
 
+export async function schedulePromoAgendadoToActive(){ 
+  console.log('Verificando promoções agendadas...')
+  const promocoes = await prisma.promocao.findMany({
+    where: {
+      status: 'Agendado',
+      data_inicio: {
+        lte: new Date()
+      }
+    }
+  })
+
+  if(promocoes.length > 0){
+    promocoes.forEach(async promocao => {
+      await prisma.promocao.update({
+        where: {
+          id: promocao.id
+        },
+        data: {
+          status: 'Ativo',
+        }
+      })
+    })
+  }
+  console.log('Verificação concluída!')
+}
+
+export async function schedulePromoAtivoToInativo() {
+  console.log('Verificando promoções ativas...')
+  const promocoes = await prisma.promocao.findMany({
+    where: {
+      status: 'Ativo',
+      data_fim: {
+        lte: new Date()
+      }
+    }
+  })
+
+  if(promocoes.length > 0){
+    promocoes.forEach(async promocao => {
+      await prisma.promocao.update({
+        where: {
+          id: promocao.id
+        },
+        data: {
+          status: 'Inativo',
+        }
+      })
+    })
+  }
+  console.log('Verificação concluída!')
+  
+}

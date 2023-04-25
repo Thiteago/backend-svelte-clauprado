@@ -13,7 +13,8 @@ import { routerRelatorio } from "./src/Routes/RelatoriosRoute";
 import { routerDespesas } from "./src/Routes/DespesasRoute";
 import { routerAvaliacoes } from "./src/Routes/AvaliacoesRoute";
 
-import { scheduleAbandoned, scheduleDailyDespesas ,scheduleMonthlyDespesas , scheduleYearlyDespesas } 
+import { scheduleAbandoned, scheduleDailyDespesas ,scheduleMonthlyDespesas , 
+  scheduleYearlyDespesas, schedulePromoAgendadoToActive, schedulePromoAtivoToInativo } 
 from "./src/Routines";
 
 
@@ -23,20 +24,21 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
 });
 
-
-cron.schedule('0 0 * * *', () => {
+cron.schedule('0 0 * * *', () => { // 0 0 * * * = 00:00 todos os dias
+  schedulePromoAgendadoToActive()
+  schedulePromoAtivoToInativo
   scheduleDailyDespesas()
 })
 
-cron.schedule('*/15 * * * *', () => {
+cron.schedule('*/15 * * * *', () => { // */15 * * * * = a cada 15 minutos
   scheduleAbandoned()
 })
 
-cron.schedule('0 0 1 * *', () => {
+cron.schedule('0 0 1 * *', () => { // 0 0 1 * * = 00:00 todo dia 1
   scheduleMonthlyDespesas()
 })
 
-cron.schedule('0 0 1 1 *', () => {
+cron.schedule('0 0 1 1 *', () => { // 0 0 1 1 * = 00:00 todo dia 1 de janeiro
   scheduleYearlyDespesas()
 })
 
