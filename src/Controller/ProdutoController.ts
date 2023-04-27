@@ -163,10 +163,6 @@ export class ProdutoController{
       ids.push(item.filename)
     })
 
-    for(var i = 0; i< ids.length; i++){
-      ids[i] = ids[i].split('_',1)[0]
-    }
-
     let {
       nome,           
       descricao,      
