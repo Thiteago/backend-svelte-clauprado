@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import cron from "node-cron"
 import path from 'path'
+import  morgan  from "morgan";
 import { rateLimit } from "express-rate-limit";
 import { routerUser } from "./src/Routes/UsuarioRoute";
 import { routerProduto } from "./src/Routes/ProdutoRoute";
@@ -18,11 +19,11 @@ import { scheduleAbandoned, scheduleDailyDespesas ,scheduleMonthlyDespesas ,
 from "./src/Routines";
 
 
-const limiter = rateLimit({
-  windowMs: 5 * 60 * 1000, 
-  max: 100, 
-  message: "Too many requests from this IP, please try again later.",
-});
+// const limiter = rateLimit({
+//   windowMs: 5 * 60 * 1000, 
+//   max: 100, 
+//   message: "Too many requests from this IP, please try again later.",
+// });
 
 cron.schedule('0 0 * * *', () => { // 0 0 * * * = 00:00 todos os dias
   schedulePromoAgendadoToActive()
@@ -52,10 +53,11 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 
+app.use(morgan("dev"));
 app.use("/static", express.static(path.resolve(__dirname, "public","uploads")))
 app.use(express.json());
 app.use(cors(corsOptions));
-app.use(limiter);
+// app.use(limiter);
 app.use(routerUser);
 app.use(routerProduto);
 app.use(routerCarrinho);
