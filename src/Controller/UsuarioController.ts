@@ -30,7 +30,7 @@ export class UsuarioController {
       return res.status(401).json({message: "User Already Exists!"})
     }
     const hash_password = await hash(senha, 8)
-    const user = await prisma.user.create({
+    const new_data = await prisma.user.create({
       data: {
         nome,
         dataNascimento,
@@ -72,7 +72,7 @@ export class UsuarioController {
           }
         }
       }else{
-        await prisma.endereco.create({
+        let endereco = await prisma.endereco.create({
           data: {
             rua,
             numeroRua: numeroRua.toString(),
@@ -84,10 +84,10 @@ export class UsuarioController {
             userId: user.id
           }
         })
+        return [user, endereco]
       }
     })
-
-    return res.status(201).json({user})
+    return res.status(201).json(new_data)
   }
 
   async listar(req: Request, res: Response){
@@ -203,7 +203,7 @@ export class UsuarioController {
     }
 
     if(novoEndereco){
-      return res.status(201).json({message: "Endereço cadastrado com sucesso"})
+      return res.status(201).json(novoEndereco)
     }else{
       return res.status(401).json({error: "Erro ao cadastrar endereço"})
     }
