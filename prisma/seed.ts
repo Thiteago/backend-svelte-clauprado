@@ -105,7 +105,7 @@ async function main(){
         largura: "1",
         comprimento: "1",
         material: "Material",
-        categoria: "Categoria",
+        categoria: "Topo de Bolo",
         imagens: ["Imagem"],
         tipo: "Tipo",
         status: "Ativo"
