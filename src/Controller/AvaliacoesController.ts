@@ -64,6 +64,7 @@ export class AvaliacoesController {
   async verificarUsuario(req: Request, res: Response) {
     //verifica se o usuario ja comprou o produto
     const { id_usuario, id_produto } = req.body;
+    let comprou = false;
     
     const usuario = await prisma.user.findUnique({
       where: {
@@ -95,9 +96,18 @@ export class AvaliacoesController {
       },
     });
 
-    if (usuario?.pedidos.length === 0) {
-      return res.json(false);
+
+    if (usuario) {
+      usuario.pedidos.map(element => {
+        if(element.vendas.length > 0 || element.alugueis.length > 0){
+          comprou = true;
+        }else{
+          comprou = false;
+        }
+      });
+    }else{
+      comprou = false;
     }
-    return res.json(true);
+    return res.json(comprou);
   }
 }
