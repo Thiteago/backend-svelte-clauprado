@@ -75,7 +75,7 @@ export class AvaliacoesController {
           where: {
             OR: [
               { status: "pago" },
-              { status: "entregue" },
+              { status: "Finalizado" },
               { status: "devolvido" },
               { status: "Aguardando Envio" },
             ],  
