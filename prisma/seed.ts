@@ -128,32 +128,34 @@ async function main(){
         },
       }
     })
+    let aluguel:any = []
+    let venda:any = []
+    if(i%2 == 0){
+      aluguel = await prisma.aluguel.create({
+        data: 
+        {
+          data_aluguel: new Date(),
+          data_disponibilidade: new Date(),
+          data_expiracao: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000),
+          status_aluguel: "Disponivel",
+          dias_alugados: 1,
+          tipo: "Aluguel",
 
-
-    let aluguel = await prisma.aluguel.create({
-      data: 
-      {
-        data_aluguel: new Date(),
-        data_disponibilidade: new Date(),
-        data_expiracao: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000),
-        status_aluguel: "Disponivel",
-        dias_alugados: 1,
-        tipo: "Aluguel",
-
-        produto: {
-          connect: { id: produto.id },
+          produto: {
+            connect: { id: produto.id },
+          },
         },
-      },
-    })
-
-    let venda = await prisma.venda.create({
-      data:
-      {
-        tipo: "Venda",
-        status_venda: "Disponivel",
-        produtoId: produto.id
-      }
-    })
+      })
+    }else{
+      venda = await prisma.venda.create({
+        data:
+        {
+          tipo: "Venda",
+          status_venda: "Disponivel",
+          produtoId: produto.id
+        }
+      })
+    }
 
     let pedido = await prisma.pedido.create({
       data:
