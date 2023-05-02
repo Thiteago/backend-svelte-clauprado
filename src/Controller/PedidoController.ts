@@ -789,6 +789,7 @@ export class PedidoController {
 
 
 async function capturePayment(orderId: any) {
+  console.log('capturing payment')
   const accessToken = await generateAccessToken();
   const url = `${baseURL.sandbox}/v2/checkout/orders/${orderId}/capture`;
   const response = await fetch(url, {
