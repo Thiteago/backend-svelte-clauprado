@@ -5,16 +5,33 @@ const prisma = new PrismaClient();
 async function main(){
 
   let hash_password = await hash("123456", 8)
+  let hash_admin_password = await hash("adminclau", 8)
+
+  let user_admin = await prisma.user.upsert({
+    where: { email: 'admin@clauprado.com'},
+    update: {},
+    create: {
+      nome: "Admin",
+      dataNascimento: "1998-12-27",
+      email: 'admin@clauprado.com',
+      senha: hash_admin_password,
+      cpf: '42524592812',
+      numeroTel: "123456789",
+      numeroCel: "12997431974",
+      cargo: "Admin",
+      status: "Ativo"
+    }
+  })
 
   let user_joao = await prisma.user.upsert({
-      where: { email: `joao@gmail.com`},
+      where: { email: 'joao@gmail.com'},
       update: {},
       create: {
         nome: "João",
         dataNascimento: "1999-01-01",
-        email: `joao$@gmail.com`,
+        email: 'joao@gmail.com',
         senha: hash_password,
-        cpf: `12345678910`,
+        cpf: '12345678910',
         numeroTel: "123456789",
         numeroCel: "123456789",
         cargo: "Usuario",
@@ -23,14 +40,14 @@ async function main(){
   })
 
   let user_maria = await prisma.user.upsert({
-    where: { email: `maria@gmail.com`},
+    where: { email: 'maria@gmail.com'},
     update: {},
     create: {
       nome: "Maria",
       dataNascimento: "1999-01-01",
-      email: `maria@gmail.com`,
+      email: 'maria@gmail.com',
       senha: hash_password,
-      cpf: `12345678911`,
+      cpf: '12345678911',
       numeroTel: "123456789",
       numeroCel: "123456789",
       cargo: "Usuario",
@@ -39,14 +56,14 @@ async function main(){
   })
 
   let user_jose = await prisma.user.upsert({
-    where: { email: `jose@gmail.com`},
+    where: { email: 'jose@gmail.com'},
     update: {},
     create: {
       nome: "jose",
       dataNascimento: "1999-01-01",
-      email: `jose@gmail.com`,
+      email: 'jose@gmail.com',
       senha: hash_password,
-      cpf: `12345678911`,
+      cpf: '12345678912',
       numeroTel: "123456789",
       numeroCel: "123456789",
       cargo: "Usuario",
@@ -55,14 +72,14 @@ async function main(){
   })
 
   let user_pedro = await prisma.user.upsert({
-    where: { email: `pedro@gmail.com`},
+    where: { email: 'pedro@gmail.com'},
     update: {},
     create: {
       nome: "pedro",
       dataNascimento: "1999-01-01",
-      email: `pedro@gmail.com`,
+      email: 'pedro@gmail.com',
       senha: hash_password,
-      cpf: `12345678911`,
+      cpf: '12345678913',
       numeroTel: "123456789",
       numeroCel: "123456789",
       cargo: "Usuario",
@@ -90,46 +107,89 @@ async function main(){
       },
     })
 
+    if(i == 0){
+      await prisma.endereco.create({
+        data:
+        {
+          rua: 'Av Castelo Branco',
+          numeroRua: '2667',
+          bairro: 'Morro do Elefante',
+          cidade: 'Campos do Jordão',
+          estado: 'SP',
+          cep: '12460000',
+          principal: true,
 
-    let produto = await prisma.produto.create({
-      data: 
-      {
-        nome: `Produto ${i}`,
-        descricao: `Descrição ${i}`,
-        dataFabricacao: new Date("2021-01-01"),
-        dataPublicacao: new Date("2021-01-01"),
-        quantidadeEmEstoque: 1,
-        peso: 1,
-        valor: 1,
-        altura: "1",
-        largura: "1",
-        comprimento: "1",
-        material: "Material",
-        categoria: "Topo de Bolo",
-        imagens: ["Imagem"],
-        tipo: "Tipo",
-        status: "Ativo"
-      }
-    })
+          user: {
+            connect: { id: user_admin.id },
+          }
+        }
+      })
+    }
+    let produto:any = []
+    if(i%2 == 0){
+      produto = await prisma.produto.create({
+        data: 
+        {
+          nome: `Produto ${i}`,
+          descricao: `Descrição ${i}`,
+          dataFabricacao: new Date("2021-01-01"),
+          dataPublicacao: new Date("2021-01-01"),
+          quantidadeEmEstoque: 1,
+          peso: 1,
+          valor: 1,
+          altura: "1",
+          largura: "1",
+          comprimento: "1",
+          material: "Material",
+          categoria: "Topo de Bolo",
+          imagens: ["Imagem"],
+          tipo: "Aluguel",
+          status: "Ativo"
+        }
+      })
+    }else{
+      produto = await prisma.produto.create({
+        data: 
+        {
+          nome: `Produto ${i}`,
+          descricao: `Descrição ${i}`,
+          dataFabricacao: new Date("2021-01-01"),
+          dataPublicacao: new Date("2021-01-01"),
+          quantidadeEmEstoque: 1,
+          peso: 1,
+          valor: 1,
+          altura: "1",
+          largura: "1",
+          comprimento: "1",
+          material: "Material",
+          categoria: "Topo de Bolo",
+          imagens: ["Imagem"],
+          tipo: "Venda",
+          status: "Ativo"
+        }
+      })
+    }
 
+    if(i == 0){
+      await prisma.promocao.create({
+        data:
+        {
+          nome: `Promoção ${i}`,
+          data_fim: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000),
+          categorias: ["Categoria"],
+          valor_desconto: 1,
+          tipo: "porcentual",
+          status: "Ativo",
 
-    await prisma.promocao.create({
-      data:
-      {
-        nome: `Promoção ${i}`,
-        data_fim: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000),
-        categorias: ["Categoria"],
-        valor_desconto: 1,
-        tipo: "porcentual",
-        status: "Ativo",
-
-        produtos: {
-          connect: { id: produto.id },
-        },
-      }
-    })
+          produtos: {
+            connect: { id: produto.id },
+          },
+        }
+      })
+    }
     let aluguel:any = []
     let venda:any = []
+    let pedido:any = []	
     if(i%2 == 0){
       aluguel = await prisma.aluguel.create({
         data: 
@@ -146,6 +206,23 @@ async function main(){
           },
         },
       })
+      pedido = await prisma.pedido.create({
+        data:
+        {
+          valor: 1,
+          valor_frete: 1,
+          tipo_frete: "PAC",
+          status: "Finalizado",
+          data_envio: new Date(),
+          codigo_rastreio: "123456789",
+          userId: ids[i],
+          enderecoId: endereco.id,
+          
+          alugueis: {
+            connect: { id: aluguel.id },
+          },
+        }
+      })
     }else{
       venda = await prisma.venda.create({
         data:
@@ -155,29 +232,26 @@ async function main(){
           produtoId: produto.id
         }
       })
+      pedido = await prisma.pedido.create({
+        data:
+        {
+          valor: 1,
+          valor_frete: 1,
+          tipo_frete: "PAC",
+          status: "Finalizado",
+          data_envio: new Date(),
+          codigo_rastreio: "123456789",
+          userId: ids[i],
+          enderecoId: endereco.id,
+          
+          vendas: {
+            connect: { id: venda.id },
+          },
+        }
+      })
     }
 
-    let pedido = await prisma.pedido.create({
-      data:
-      {
-        valor: 1,
-        valor_frete: 1,
-        tipo_frete: "PAC",
-        status: "Finalizado",
-        data_envio: new Date(),
-        codigo_rastreio: "123456789",
-        userId: ids[i],
-        enderecoId: endereco.id,
-        
-        vendas: {
-          connect: { id: venda.id },
-        },
-        alugueis: {
-          connect: { id: aluguel.id },
-        },
-
-      }
-    })
+    
 
     let pagamento = await prisma.pagamento.create({
       data:
