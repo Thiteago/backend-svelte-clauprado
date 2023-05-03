@@ -445,6 +445,41 @@ export class PedidoController {
     }
   }
 
+  async listarAlugueis(req: Request, res: Response){
+
+    //get pedidos com um ou mais alugueis com status diferente de "devolvido" e diferente de "disponivel"
+    const pedidos = await prisma.pedido.findMany({
+      where: {
+        alugueis: {
+          some: {
+            NOT: {
+              status_aluguel: {
+                in: ["Devolvido", "Disponivel"]
+              }
+            }
+          }
+        },
+        vendas: {
+          none: {}
+        }
+      },
+      include: {
+        alugueis: {
+          include: {
+            produto: true,
+          }
+        },
+        user: true,
+      } 
+    })
+
+    if(pedidos.length > 0){
+      res.status(200).json(pedidos)
+    }else{
+      res.status(404).json({message: "Nenhum pedido encontrado"})
+    }
+  }
+
   async alterarProdutos(req: Request, res: Response){
     const {produtosAlugados, produtosVendidos} = req.body
     let produtosAlugadosId: any = []
@@ -870,6 +905,15 @@ export class PedidoController {
         },
         data: {
           status_venda: "Vendido"
+        }
+      })
+
+      await prisma.aluguel.updateMany({
+        where: {
+          pedidoId: pagamento?.pedidoId
+        },
+        data: {
+          status_aluguel: "Alugado"
         }
       })
     })
