@@ -334,6 +334,17 @@ export class PedidoController {
             cartao: true
           }
         },
+        alugueis: {
+          include: {
+            produto: true,
+          }
+        },
+        vendas: {
+          include: {
+            produto: true,
+          }
+        },
+
         endereco: true,
       }
     })
@@ -713,6 +724,87 @@ export class PedidoController {
     })    
     if(pedido){
       return res.status(200).json({message: "Pedido marcado como enviado com sucesso"})
+    }else{
+      return res.status(404).json({message: "Nenhum pedido encontrado"})
+    }
+  }
+
+  async atualizarDevolucao(req: Request, res: Response){
+    const id = Number(req.params.id)
+    const today = new Date()
+    const {codigo_rastreio, idAluguel} = req.body
+
+    let aluguel = await prisma.aluguel.update({
+      where: {
+        id: idAluguel
+      },
+      data: {
+        status_aluguel: "Devolvido",
+        data_devolucao: today,
+        codigo_rastreio_devolucao: codigo_rastreio
+      },
+      include: {
+        produto: true
+      }
+    })
+
+    await prisma.aluguel.create({
+      data: {
+        data_aluguel: null,
+        data_expiracao: null,
+        status_aluguel: "Disponivel",
+        dias_alugados: 0,
+        tipo: "Aluguel",
+        produtoId: aluguel.produtoId,
+      }
+    })
+
+    await prisma.produto.update({
+      where: {
+        id: aluguel.produtoId
+      },
+      data: {
+        quantidadeEmEstoque: {
+          increment: 1
+        }
+      }
+    })
+
+    const pedido = await prisma.pedido.findFirst({
+      where: {
+        id: id
+      },
+      include: {
+        alugueis: {
+          include: {
+            produto: true
+          }
+        }
+      }
+    })
+    
+    if(pedido){
+      if(pedido.alugueis.length > 0){
+        //verify if all alugueis have been returned
+        let allReturned = true
+        for(let i = 0; i < pedido.alugueis.length ; i++) {
+          if(pedido.alugueis[i].status_aluguel != "Devolvido"){
+            allReturned = false
+          }
+        }
+        if(allReturned){
+          await prisma.pedido.update({
+            where: {
+              id: id
+            },
+            data: {
+              status: "Finalizado",
+            }
+          })
+        }
+      }
+
+      return res.status(200).json({message: "Aluguel atualizado com sucesso"})
     }else{
       return res.status(404).json({message: "Nenhum pedido encontrado"})
     }
