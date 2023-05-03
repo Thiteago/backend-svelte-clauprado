@@ -198,7 +198,7 @@ async function main(){
           data_disponibilidade: new Date(),
           data_expiracao: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000),
           status_aluguel: "Disponivel",
-          dias_alugados: 1,
+          dias_alugados: 0,
           tipo: "Aluguel",
 
           produto: {
