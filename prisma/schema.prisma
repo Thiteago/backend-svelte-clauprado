@@ -85,13 +85,15 @@ model Promocao {
 }
 
 model Aluguel {
-  id                   Int       @id @default(autoincrement())
-  data_aluguel         DateTime?
-  data_disponibilidade DateTime  @default(now())
-  data_expiracao       DateTime?
-  status_aluguel       String    @default("Disponivel")
-  dias_alugados        Int       @default(0)
-  tipo                 String    @default("Aluguel")
+  id                        Int       @id @default(autoincrement())
+  data_aluguel              DateTime?
+  data_disponibilidade      DateTime  @default(now())
+  data_expiracao            DateTime?
+  data_devolucao            DateTime?
+  codigo_rastreio_devolucao String?
+  status_aluguel            String    @default("Disponivel")
+  dias_alugados             Int       @default(0)
+  tipo                      String    @default("Aluguel")
 
   produto   Produto @relation(fields: [produtoId], references: [id])
   produtoId Int
