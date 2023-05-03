@@ -272,6 +272,7 @@ export class ProdutoController{
               where: { id: idProduto },
               data: {
                 quantidadeEmEstoque: parseInt(quantidade),
+                tipo: 'Aluguel'
               },
             });
           }
