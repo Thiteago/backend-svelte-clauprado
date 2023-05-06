@@ -15,6 +15,7 @@ routerProduto.post("/Produto/Visualizou/:id", produtocontroller.marcarVisualizac
 
 routerProduto.get("/Produto", produtocontroller.listar);
 routerProduto.get("/Produto/:id", produtocontroller.listarpeloid)
+routerProduto.get("/categoria/listar", produtocontroller.listarCategorias)
 
 routerProduto.patch("/Produto/:id/Alterar",upload.array('imagens', 4), produtocontroller.alterar)
 

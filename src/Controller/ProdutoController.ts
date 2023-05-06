@@ -645,4 +645,22 @@ export class ProdutoController{
   
     return res.json(produto)
   }
+
+  async listarCategorias (req: Request, res: Response){
+    const produtos = await prisma.produto.findMany({
+      where: {
+        status: 'Ativo'
+      }
+    })
+
+    let categorias: any = []
+
+    for(let i = 0; i < produtos.length; i++){
+      if(!categorias.includes(produtos[i].categoria)){
+        categorias.push(produtos[i].categoria)
+      }
+    }
+
+    return res.status(200).json(categorias)
+  }
 }
