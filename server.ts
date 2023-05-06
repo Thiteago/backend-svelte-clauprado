@@ -13,9 +13,11 @@ import { routerPromocao } from "./src/Routes/PromocaoRoute";
 import { routerRelatorio } from "./src/Routes/RelatoriosRoute";
 import { routerDespesas } from "./src/Routes/DespesasRoute";
 import { routerAvaliacoes } from "./src/Routes/AvaliacoesRoute";
+import { routerAluguel } from "./src/Routes/AluguelRoute";
 
 import { scheduleAbandoned, scheduleDailyDespesas ,scheduleMonthlyDespesas , 
-  scheduleYearlyDespesas, schedulePromoAgendadoToActive, schedulePromoAtivoToInativo } 
+  scheduleYearlyDespesas, schedulePromoAgendadoToActive, schedulePromoAtivoToInativo,
+  scheduleRentStatus} 
 from "./src/Routines";
 
 
@@ -29,6 +31,7 @@ cron.schedule('0 0 * * *', () => { // 0 0 * * * = 00:00 todos os dias
   schedulePromoAgendadoToActive()
   schedulePromoAtivoToInativo
   scheduleDailyDespesas()
+  scheduleRentStatus()
 })
 
 cron.schedule('*/15 * * * *', () => { // */15 * * * * = a cada 15 minutos
@@ -66,6 +69,7 @@ app.use(routerPagamento)
 app.use(routerPromocao)
 app.use(routerRelatorio)
 app.use(routerDespesas)
+app.use(routerAluguel)
 app.use(routerAvaliacoes)
 app.listen(3333, () => console.log('Server is running on port 3333'));
 

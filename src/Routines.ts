@@ -211,3 +211,30 @@ export async function schedulePromoAtivoToInativo() {
   console.log('Verificação concluída!')
   
 }
+
+export async function scheduleRentStatus(){
+
+  console.log('Verificando alugueis...')
+  const alugueis = await prisma.aluguel.findMany({
+    where: {
+      data_expiracao: {
+        lte: new Date()
+      }
+    }
+  })
+
+  if(alugueis.length > 0){
+    alugueis.forEach(async aluguel => {
+      await prisma.aluguel.update({
+        where: {
+          id: aluguel.id
+        },
+        data: {
+          status_aluguel: 'Atrasado'
+        }
+      })
+    })
+  }
+  console.log(`${alugueis.length} alugueis alterados para 'Atrasados'!`)
+  console.log('Verificação concluída!')
+}
