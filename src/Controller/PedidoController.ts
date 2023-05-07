@@ -920,6 +920,15 @@ export class PedidoController {
 
     res.json(captureData);
   }
+
+  async pagamentoPedidoGerado(req: Request, res: Response){
+    const pedido = req.body
+    console.log(pedido)
+    const paypalOrder = await createOrder(pedido.valor)
+    console.log(paypalOrder)
+
+    return res.status(200).json(paypalOrder)
+  }
   
 }
 

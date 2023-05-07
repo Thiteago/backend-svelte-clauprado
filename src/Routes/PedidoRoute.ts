@@ -21,5 +21,6 @@ routerPedido.patch("/pedido/alterar/produtos/:id", pedidoController.alterarProdu
 routerPedido.patch("/pedido/alterar/endereco/:id", pedidoController.alterarEndereco);
 routerPedido.patch("/pedido/alterar/envio/:id", pedidoController.atualizarEnvio);
 routerPedido.patch("/pedido/alterar/devolucao/:id", pedidoController.atualizarDevolucao);
+routerPedido.patch("/pedido/paypal/novamente", pedidoController.pagamentoPedidoGerado);
 
 
