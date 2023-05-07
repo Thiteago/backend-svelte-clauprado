@@ -25,6 +25,8 @@ export async function scheduleAbandoned(){
       })
     })
   }
+
+  console.log(`${carts.length} carrinhos abandonados!`)
   console.log('Verificação concluída!')
 }
 
@@ -54,6 +56,7 @@ export async function scheduleDailyDespesas(){
       })
     })
   }
+  console.log(`${despesas.length} despesas recorrentes diarias criadas!`)
   console.log('Verificação concluída!')
 }
 
@@ -105,6 +108,8 @@ export async function scheduleMonthlyDespesas(){
       }
     })
   }
+
+  console.log(`${despesas.length} despesas recorrentes mensais criadas!`)
   console.log('Verificação concluída!')
 }
 
@@ -156,6 +161,8 @@ export async function scheduleYearlyDespesas(){
       }
     })
   }
+
+  console.log(`${despesas.length} despesas recorrentes anuais criadas!`)
   console.log('Verificação concluída!')
 }
 
@@ -182,6 +189,7 @@ export async function schedulePromoAgendadoToActive(){
       })
     })
   }
+  console.log(`${promocoes.length} promoções alteradas para 'Ativo'!`)
   console.log('Verificação concluída!')
 }
 
@@ -208,6 +216,8 @@ export async function schedulePromoAtivoToInativo() {
       })
     })
   }
+
+  console.log(`${promocoes.length} promoções alteradas para 'Inativo'!`)
   console.log('Verificação concluída!')
   
 }
