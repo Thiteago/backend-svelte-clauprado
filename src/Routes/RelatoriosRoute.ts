@@ -12,4 +12,3 @@ routerRelatorio.get('/relatorio/desempenho', relatorioController.desempenhoDePro
 routerRelatorio.post('/relatorio/vendasDiarias/selecionar', relatorioController.vendasDiariasSelecionar)
 routerRelatorio.post('/relatorio/conversaoDeVendas/selecionar', relatorioController.conversaoDeVendasSelecionar)
 routerRelatorio.post('/relatorio/carrinhos/selecionar', relatorioController.carrinhosAbandonadosSelecionar)
-routerRelatorio.post('/relatorio/desempenho/selecionar', relatorioController.desempenhoDeProdutosSelecionar)

@@ -196,6 +196,4 @@ export class RelatoriosController {
     return res.status(200).json({'cartsAbandoned': carts, 'cartsCreated': cartsCount})
   }
 
-  async desempenhoDeProdutosSelecionar(req: Request, res: Response) {
-  }
 }
