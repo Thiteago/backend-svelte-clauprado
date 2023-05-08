@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../utils/prisma";
+import  { DateTime }   from 'luxon'
+
 
 export class RelatoriosController {
 
@@ -90,13 +92,20 @@ export class RelatoriosController {
   }
 
   async vendasDiariasSelecionar(req: Request, res: Response) {
-    let { dataInicial, dataFinal } = req.body;
+    let { dataInicial, dataFinal } = req.body
+
+    if (!dataInicial || !dataFinal) {
+      return res.status(400).json({ message: "Data inicial ou final ausente" });
+    }
+
+    dataFinal = DateTime.fromISO(dataFinal).endOf('day').toISO()!
+    dataInicial = DateTime.fromISO(dataInicial).startOf('day').toISO()!
 
     const pedidos = await prisma.pedido.findMany({
       where: {
         data_pedido: {
-          gte: new Date(dataInicial),
-          lte: new Date(dataFinal),
+          gte: dataInicial,
+          lte: dataFinal,
         },
         Pagamento: {
           status: "Pago",
