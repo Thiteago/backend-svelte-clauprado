@@ -11,6 +11,7 @@ routerPedido.delete("/pedido/cancelar/:id", pedidoController.cancelarPedido);
 
 routerPedido.post("/pedido/capturar/", pedidoController.capturarPagamento);
 routerPedido.post("/pedido/gerar", pedidoController.gerar);
+routerPedido.post("/pedido/paypal/novamente", pedidoController.pagamentoPedidoGerado);
 
 routerPedido.get("/pedido/listar/user/:id", pedidoController.listarPeloUserId);
 routerPedido.get("/pedido/listar/:id", pedidoController.listarPeloId);
@@ -21,6 +22,5 @@ routerPedido.patch("/pedido/alterar/produtos/:id", pedidoController.alterarProdu
 routerPedido.patch("/pedido/alterar/endereco/:id", pedidoController.alterarEndereco);
 routerPedido.patch("/pedido/alterar/envio/:id", pedidoController.atualizarEnvio);
 routerPedido.patch("/pedido/alterar/devolucao/:id", pedidoController.atualizarDevolucao);
-routerPedido.patch("/pedido/paypal/novamente", pedidoController.pagamentoPedidoGerado);
 
 
