@@ -163,6 +163,37 @@ export class RelatoriosController {
   }
 
   async carrinhosAbandonadosSelecionar(req: Request, res: Response) {
+    let { dataInicial, dataFinal } = req.body
+
+    if (!dataInicial || !dataFinal) {
+      return res.status(400).json({ message: "Data inicial ou final ausente" });
+    }
+
+    dataFinal = DateTime.fromISO(dataFinal).endOf('day').toISO()!
+    dataInicial = DateTime.fromISO(dataInicial).startOf('day').toISO()!
+
+    const carts = await prisma.createdCart.findMany({
+      where: {
+        date: {
+          gte: dataInicial,
+          lte: dataFinal,
+        },
+        abandonado: true,
+      },
+    });
+
+    const cartsCount = await prisma.createdCart.findMany({
+      where: {
+        date: {
+          gte: dataInicial,
+          lte: dataFinal,
+        },
+      }
+    })
+
+    if(!carts) return res.status(404).json({message: "Nenhum carrinho encontrado"})
+
+    return res.status(200).json({'cartsAbandoned': carts, 'cartsCreated': cartsCount})
   }
 
   async desempenhoDeProdutosSelecionar(req: Request, res: Response) {
