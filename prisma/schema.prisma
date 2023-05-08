@@ -147,7 +147,7 @@ model Pagamento {
 
   boleto Boleto?
   cartao Cartao?
-  paypal Paypal?
+  paypal Paypal[]
 }
 
 model Boleto {
@@ -181,7 +181,7 @@ model Paypal {
   link   String
 
   pagamento   Pagamento? @relation(fields: [pagamentoId], references: [id], onDelete: Cascade)
-  pagamentoId Int        @unique
+  pagamentoId Int
 }
 
 model Visit {
