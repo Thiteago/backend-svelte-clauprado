@@ -89,7 +89,7 @@ async function main(){
 
   let ids = [user_joao.id, user_maria.id, user_jose.id, user_pedro.id]
 
-  for(let i = 0; i <= 3; i++){
+  for(let i = 1; i <= 4; i++){
     let endereco = await prisma.endereco.create({
       data: 
       {
@@ -107,7 +107,7 @@ async function main(){
       },
     })
 
-    if(i == 0){
+    if(i == 1){
       await prisma.endereco.create({
         data:
         {
@@ -170,7 +170,7 @@ async function main(){
       })
     }
 
-    if(i == 0){
+    if(i == 1){
       await prisma.promocao.create({
         data:
         {
