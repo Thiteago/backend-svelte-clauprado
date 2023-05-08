@@ -923,9 +923,16 @@ export class PedidoController {
 
   async pagamentoPedidoGerado(req: Request, res: Response){
     const pedido = req.body
-    console.log(pedido)
     const paypalOrder = await createOrder(pedido.valor)
-    console.log(paypalOrder)
+    await prisma.paypal.create({
+      data: {
+        id: paypalOrder.id,
+        status: paypalOrder.status,
+        link: paypalOrder.links[1].href,
+        pagamentoId: pedido.Pagamento.id
+      }
+    })
+    
 
     return res.status(200).json(paypalOrder)
   }
@@ -933,44 +940,67 @@ export class PedidoController {
 }
 
 
-async function capturePayment(orderId: any) {
+async function capturePayment(orderId: any, maxRetries: number = 5) {
   console.log('capturing payment')
   const accessToken = await generateAccessToken();
   const url = `${baseURL.sandbox}/v2/checkout/orders/${orderId}/capture`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  const data = await response.json();
-  return data;
+  for (let i = 1; i <= maxRetries; i++) {
+    console.log(`Attempt ${i} to capture payment`)
+    try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = await response.json();
+    return data;
+    } catch (error) {
+      console.log(`Error on attempt ${i}: ${error}`);
+    }
+  }
+
+  throw new Error(`Failed to create order after ${maxRetries} attempts`);
+  
 }
 
-async function createOrder(value: any) {
+async function createOrder(value: any, maxRetries: number = 5) {
   const accessToken = await generateAccessToken();
   const url = `${baseURL.sandbox}/v2/checkout/orders`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({
-      intent: "CAPTURE",
-      purchase_units: [
-        {
-          amount: {
-            currency_code: "BRL",
-            value: value,
-          },
+
+  for (let i = 1; i <= maxRetries; i++) {
+    console.log(`Attempt ${i} to create order`)
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
-      ],
-    }),
-  });
-  const data = await response.json();
-  return data;
+        body: JSON.stringify({
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              amount: {
+                currency_code: "BRL",
+                value: value,
+              },
+            },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      console.log(`Error on attempt ${i}: ${error}`);
+    }
+  }
+
+  throw new Error(`Failed to create order after ${maxRetries} attempts`);
 }
 
 
