@@ -8,3 +8,8 @@ routerRelatorio.get('/relatorio/vendasDiarias', relatorioController.vendasDiaria
 routerRelatorio.get('/relatorio/conversaoDeVendas', relatorioController.conversaoDeVendas)
 routerRelatorio.get('/relatorio/carrinhos', relatorioController.carrinhosAbandonados)
 routerRelatorio.get('/relatorio/desempenho', relatorioController.desempenhoDeProdutos)
+
+routerRelatorio.post('/relatorio/vendasDiarias/selecionar', relatorioController.vendasDiariasSelecionar)
+routerRelatorio.post('/relatorio/conversaoDeVendas/selecionar', relatorioController.conversaoDeVendasSelecionar)
+routerRelatorio.post('/relatorio/carrinhos/selecionar', relatorioController.carrinhosAbandonadosSelecionar)
+routerRelatorio.post('/relatorio/desempenho/selecionar', relatorioController.desempenhoDeProdutosSelecionar)

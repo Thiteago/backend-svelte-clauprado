@@ -9,6 +9,7 @@ export class RelatoriosController {
         data_pedido: {
           gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
         },
+        
         Pagamento: {
           status: "Pago",
         },
@@ -86,5 +87,38 @@ export class RelatoriosController {
 
     if(!produtos) return res.status(404).json({message: "Nenhum produto encontrado"})
     return res.status(200).json(produtos)
+  }
+
+  async vendasDiariasSelecionar(req: Request, res: Response) {
+    let { dataInicial, dataFinal } = req.body;
+
+    const pedidos = await prisma.pedido.findMany({
+      where: {
+        data_pedido: {
+          gte: new Date(dataInicial),
+          lte: new Date(dataFinal),
+        },
+        Pagamento: {
+          status: "Pago",
+        },
+      },
+      include: {
+        vendas: true,
+        alugueis: true,
+      },
+    });
+
+    if(!pedidos) return res.status(404).json({message: "Nenhum pedido encontrado"})
+
+    return res.json(pedidos);
+  }
+
+  async conversaoDeVendasSelecionar(req: Request, res: Response) {
+  }
+
+  async carrinhosAbandonadosSelecionar(req: Request, res: Response) {
+  }
+
+  async desempenhoDeProdutosSelecionar(req: Request, res: Response) {
   }
 }
