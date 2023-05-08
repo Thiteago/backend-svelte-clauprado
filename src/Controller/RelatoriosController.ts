@@ -123,6 +123,43 @@ export class RelatoriosController {
   }
 
   async conversaoDeVendasSelecionar(req: Request, res: Response) {
+    let { dataInicial, dataFinal } = req.body
+
+    if (!dataInicial || !dataFinal) {
+      return res.status(400).json({ message: "Data inicial ou final ausente" });
+    }
+
+    dataFinal = DateTime.fromISO(dataFinal).endOf('day').toISO()!
+    dataInicial = DateTime.fromISO(dataInicial).startOf('day').toISO()!
+
+    const pedidos = await prisma.pedido.findMany({
+      where: {
+        data_pedido: {
+          gte: dataInicial,
+          lte: dataFinal,
+        },
+        Pagamento: {
+          status: "Pago",
+        },
+      },
+      include: {
+        vendas: true,
+        alugueis: true,
+      },
+    });
+
+    const visitas = await prisma.visit.findMany({
+      where: {
+        date: {
+          gte: dataInicial,
+          lte: dataFinal,
+        },
+      },
+    });
+
+    if(!pedidos || !visitas) return res.status(404).json({message: "Nenhum pedido encontrado"})
+
+    return res.json({'pedido': pedidos, 'visitas': visitas});
   }
 
   async carrinhosAbandonadosSelecionar(req: Request, res: Response) {
