@@ -110,4 +110,31 @@ export class AvaliacoesController {
     }
     return res.json(comprou);
   }
+
+  async listarInicio(req: Request, res: Response) {
+    const avaliacoes = await prisma.avaliacoes.findMany({
+      take: 3,
+      orderBy: {
+        nota: "desc",
+      },
+      where: {
+        nota: {
+          gte: 50,
+        },
+      },
+      include: {
+        user: {
+          select: {
+            nome: true,
+          },
+        },
+      },
+    });
+
+    if (!avaliacoes) {
+      return res.status(400).json({ message: "Erro ao listar avaliações" });
+    }
+
+    return res.status(200).json(avaliacoes);
+  }
 }

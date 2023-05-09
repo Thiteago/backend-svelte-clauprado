@@ -8,6 +8,7 @@ export const routerAvaliacoes = Router();
 routerAvaliacoes.post("/avaliacoes/produto/cadastrar/:id", avaliacoesController.cadastrar);
 routerAvaliacoes.post("/avaliacoes/verificar", avaliacoesController.verificarUsuario);
 routerAvaliacoes.get('/avaliacoes/listar/:id', avaliacoesController.listar)
+routerAvaliacoes.get('/avaliacoes/listar_inicio', avaliacoesController.listarInicio)
 routerAvaliacoes.patch('/despesas/editar/:id', avaliacoesController.editar)
 routerAvaliacoes.delete('/despesas/deletar', avaliacoesController.deletar)
 
