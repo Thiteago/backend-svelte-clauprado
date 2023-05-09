@@ -28,41 +28,27 @@ export class DespesasController {
   }
 
   async listar(req: Request, res: Response) {
-    let  { mes, dia } = req.query
-    let despesas:any = []
-    
-    if(mes && dia) {
-      let data = new Date(Date.UTC(2023, Number(mes) - 1, Number(dia)));
-      let startDate = new Date(data.getTime());
-      let endDate = new Date(data.getTime() + 24 * 60 * 60 * 1000 - 1);
+    let {dataInicial, dataFinal} = req.body
 
-      despesas = await prisma.despesas.findMany({
-        where: {
-          data: {
-            gte: startDate,
-            lt: endDate
-          }
-        }
-      })
-    }else if(mes) {
-      let data = new Date(`2023-${Number(mes) - 1}-01`);
-      let startDate = new Date(data.getFullYear(),Number(mes) - 1, 1);
-      let endDate = new Date(data.getFullYear(), Number(mes), 0);
+    if(!dataInicial || !dataFinal) {
+      return res.status(400).json({message: "Data inicial ou final ausente"});
+    }
 
-      despesas = await prisma.despesas.findMany({
-        where: {
-          data: {
-            gte: startDate.toISOString(),
-            lt: endDate.toISOString()
-          }
+    dataFinal = DateTime.fromISO(dataFinal).endOf('day').toISO()!
+    dataInicial = DateTime.fromISO(dataInicial).startOf('day').toISO()!
+
+    const despesas = await prisma.despesas.findMany({
+      where: {
+        data: {
+          gte: dataInicial,
+          lte: dataFinal
         }
-      })
-    }
-    if(!despesas) {
-      return res.status(400).json({error: 'Erro ao listar despesas'})
-    }
-    return res.status(201).json(despesas)
-    
+      }
+    })
+
+    if(!despesas) return res.status(404).json({message: "Nenhuma despesa encontrada"})
+
+    return res.status(200).json(despesas);
   }
 
   async editar(req: Request, res: Response) {
