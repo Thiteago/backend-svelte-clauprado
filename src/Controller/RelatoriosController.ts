@@ -196,4 +196,44 @@ export class RelatoriosController {
     return res.status(200).json({'cartsAbandoned': carts, 'cartsCreated': cartsCount})
   }
 
+  async despesasEGanhosSelecionar(req: Request, res: Response) {
+    let { dataInicial, dataFinal } = req.body
+
+    if (!dataInicial || !dataFinal) {
+      return res.status(400).json({ message: "Data inicial ou final ausente" });
+    }
+
+    dataFinal = DateTime.fromISO(dataFinal).endOf('day').toISO()!
+    dataInicial = DateTime.fromISO(dataInicial).startOf('day').toISO()!
+
+    const despesas = await prisma.despesas.findMany({
+      where: {
+        data: {
+          gte: dataInicial,
+          lte: dataFinal,
+        },
+      },
+    });
+
+    let ganhos = await prisma.pedido.findMany({
+      where: {
+        data_pedido: {
+          gte: dataInicial,
+          lte: dataFinal,
+        },
+        Pagamento: {
+          status: "Pago",
+        },
+      },
+      include: {
+        vendas: true,
+        alugueis: true,
+      },
+    });
+
+    if(!despesas || !ganhos) return res.status(404).json({message: "Nenhum pedido encontrado"})
+
+    return res.json({'despesas': despesas, 'ganhos': ganhos});
+  }
+
 }
