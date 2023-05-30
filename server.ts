@@ -14,6 +14,7 @@ import { routerRelatorio } from "./src/Routes/RelatoriosRoute";
 import { routerDespesas } from "./src/Routes/DespesasRoute";
 import { routerAvaliacoes } from "./src/Routes/AvaliacoesRoute";
 import { routerAluguel } from "./src/Routes/AluguelRoute";
+import { routerSlide } from "./src/Routes/SlideRoute";
 
 import { scheduleAbandoned, scheduleDailyDespesas ,scheduleMonthlyDespesas , 
   scheduleYearlyDespesas, schedulePromoAgendadoToActive, schedulePromoAtivoToInativo,
@@ -70,6 +71,7 @@ app.use(routerPromocao)
 app.use(routerRelatorio)
 app.use(routerDespesas)
 app.use(routerAluguel)
+app.use(routerSlide)
 app.use(routerAvaliacoes)
 app.listen(3333, () => console.log('Server is running on port 3333'));
 
