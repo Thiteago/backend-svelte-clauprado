@@ -1,7 +1,7 @@
 import {Router} from "express"
 import multer from "multer";
 import { ProdutoController } from "../Controller/ProdutoController";
-import { storage } from "../utils/multerConfig";
+import { storage } from "../utils/multerConfigProduto";
 
 const upload = multer({storage: storage})
 
