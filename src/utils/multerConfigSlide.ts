@@ -8,6 +8,6 @@ export const storage_img = multer.diskStorage({
     filename: (req, file, callback) => {
         const time = new Date().getTime();
 
-        callback(null, `${time}_${file.originalname}`)
+        callback(null, `${time}_${file.originalname.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9 ._-]/g, '')}`)
     }
 })
