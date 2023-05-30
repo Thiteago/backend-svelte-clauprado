@@ -59,6 +59,7 @@ const corsOptions = {
 
 app.use(morgan("dev"));
 app.use("/static", express.static(path.resolve(__dirname, "public","uploads")))
+app.use("/static/slide", express.static(path.resolve(__dirname, "public","slide_images")))
 app.use(express.json());
 app.use(cors(corsOptions));
 // app.use(limiter);
