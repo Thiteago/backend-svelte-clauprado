@@ -5,6 +5,10 @@
 /.pnp
 .pnp.js
 
+public/slide_images/*.jpg
+public/slide_images/*.png
+public/slide_images/*.jpeg
+
 public/uploads/*.jpg
 public/uploads/*.png
 public/uploads/*.jpeg
