@@ -11,3 +11,4 @@ export const routerSlide = Router();
 routerSlide.get("/slide/listar", slidecontroller.listar)
 routerSlide.post("/slide/adicionar",upload.array('imagens', 4), slidecontroller.cadastrar)
 routerSlide.patch("/slide/:id/alterar",upload.array('imagens', 4), slidecontroller.alterar)
+routerSlide.delete("/slide/:id/excluir", slidecontroller.excluir)
