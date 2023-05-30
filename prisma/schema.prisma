@@ -232,3 +232,12 @@ model Avaliacoes {
   produto   Produto @relation(fields: [produtoId], references: [id])
   produtoId Int
 }
+
+model Slide {
+  id        Int    @id @default(autoincrement())
+  titulo    String
+  descricao String
+  imagem    String
+  link      String
+  status    String @default("Ativo")
+}
