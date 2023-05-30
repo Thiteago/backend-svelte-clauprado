@@ -8,5 +8,6 @@ const upload = multer({storage: storage_img})
 const slidecontroller = new SlideController()
 export const routerSlide = Router();
 
-routerSlide.post("/slide/adicionar",upload.array('imagens', 4), slidecontroller.cadastrar);
+routerSlide.get("/slide/listar", slidecontroller.listar)
+routerSlide.post("/slide/adicionar",upload.array('imagens', 4), slidecontroller.cadastrar)
 routerSlide.patch("/slide/:id/alterar",upload.array('imagens', 4), slidecontroller.alterar)
