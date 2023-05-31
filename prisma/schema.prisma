@@ -56,7 +56,6 @@ model Produto {
   largura             String
   comprimento         String
   material            String
-  categoria           String
   imagens             String[]
   tipo                String
   status              String   @default("Ativo")
@@ -69,6 +68,8 @@ model Produto {
 
   statisticProduct StatisticProduct?
   Avaliacoes       Avaliacoes[]
+  Categorias       Categorias?       @relation(fields: [categoriasId], references: [id])
+  categoriasId     Int?
 }
 
 model Promocao {
@@ -240,4 +241,11 @@ model Slide {
   imagem    String
   link      String
   status    String @default("Ativo")
+}
+
+model Categorias {
+  id   Int    @id @default(autoincrement())
+  nome String
+
+  produtos Produto[]
 }

@@ -22,10 +22,10 @@ export class ProdutoController{
       valor,
       data_disponibilidade,
       altura, 
+      categoria,
       largura, 
       comprimento, 
       material,
-      categoria, 
       tipo,
     } = req.body
     peso = parseFloat(peso)
@@ -50,10 +50,21 @@ export class ProdutoController{
             largura,        
             comprimento,    
             material ,
-            categoria,
             imagens: ids,
             peso,
             tipo,
+
+            Categorias: {
+              connectOrCreate: {
+                where: {
+                  id: categoria.id
+                },
+                create: {
+                  nome: categoria.nome
+                }
+              }
+            },
+
 
             statisticProduct : {
               create: {
@@ -85,10 +96,20 @@ export class ProdutoController{
             largura,        
             comprimento,    
             material ,
-            categoria,
             imagens: ids,
             peso,
             tipo,
+
+            Categorias: {
+              connectOrCreate: {
+                where: {
+                  id: categoria.id
+                },
+                create: {
+                  nome: categoria.nome
+                }
+              }
+            },
 
             statisticProduct : {
               create: {
@@ -647,20 +668,10 @@ export class ProdutoController{
   }
 
   async listarCategorias (req: Request, res: Response){
-    const produtos = await prisma.produto.findMany({
-      where: {
-        status: 'Ativo'
-      }
+    let categorias = await prisma.categorias.findMany({
+      where:{}
     })
 
-    let categorias: any = []
-
-    for(let i = 0; i < produtos.length; i++){
-      if(!categorias.includes(produtos[i].categoria)){
-        categorias.push(produtos[i].categoria)
-      }
-    }
-
-    return res.status(200).json(categorias)
+    return res.json(categorias)
   }
 }
