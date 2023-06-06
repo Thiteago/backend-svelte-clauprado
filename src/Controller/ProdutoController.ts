@@ -11,8 +11,6 @@ export class ProdutoController{
       ids.push(item.filename)
     })
 
-
-
     let {
       nome,           
       descricao,      
@@ -55,15 +53,11 @@ export class ProdutoController{
             tipo,
 
             Categorias: {
-              connectOrCreate: {
-                where: {
-                  id: categoria.id
-                },
-                create: {
-                  nome: categoria.nome
-                }
+              connect: {
+                id: Number(categoria)
               }
             },
+            
 
 
             statisticProduct : {
@@ -101,15 +95,11 @@ export class ProdutoController{
             tipo,
 
             Categorias: {
-              connectOrCreate: {
-                where: {
-                  id: categoria.id
-                },
-                create: {
-                  nome: categoria.nome
-                }
+              connect: {
+                id: Number(categoria)
               }
             },
+            
 
             statisticProduct : {
               create: {
@@ -224,7 +214,6 @@ export class ProdutoController{
     
     const updateData: any = {
       nome,
-      categoria,
       descricao,
       dataFabricacao: new Date(dataFabricacao),
       valor: parseFloat(valor),
@@ -234,6 +223,10 @@ export class ProdutoController{
       largura,
       comprimento,
       material,
+
+      connect: {
+        id: categoria
+      }
     };
 
     if (ids.length > 0) {
@@ -244,6 +237,7 @@ export class ProdutoController{
       await prisma.produto.update({
         where: { id: idProduto },
         data: updateData,
+
       });
 
       if(tipo == 'Aluguel' && oldProduct){
@@ -660,18 +654,11 @@ export class ProdutoController{
               status_aluguel: 'Disponivel'
             }
           },
+          Categorias: true,
           promocao: true
         }
     })
   
     return res.json(produto)
-  }
-
-  async listarCategorias (req: Request, res: Response){
-    let categorias = await prisma.categorias.findMany({
-      where:{}
-    })
-
-    return res.json(categorias)
   }
 }
