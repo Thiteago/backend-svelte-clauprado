@@ -15,6 +15,7 @@ import { routerDespesas } from "./src/Routes/DespesasRoute";
 import { routerAvaliacoes } from "./src/Routes/AvaliacoesRoute";
 import { routerAluguel } from "./src/Routes/AluguelRoute";
 import { routerSlide } from "./src/Routes/SlideRoute";
+import { routerCategoria } from "./src/Routes/CategoriaRoute";
 
 import { scheduleAbandoned, scheduleDailyDespesas ,scheduleMonthlyDespesas , 
   scheduleYearlyDespesas, schedulePromoAgendadoToActive, schedulePromoAtivoToInativo,
@@ -70,6 +71,7 @@ app.use(routerPedido)
 app.use(routerPagamento)
 app.use(routerPromocao)
 app.use(routerRelatorio)
+app.use(routerCategoria)
 app.use(routerDespesas)
 app.use(routerAluguel)
 app.use(routerSlide)
