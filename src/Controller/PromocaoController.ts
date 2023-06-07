@@ -6,6 +6,7 @@ export class PromocaoController {
   async cadastrar(req: Request, res: Response) {
     let { nome, valor_desconto, data_inicio, data_fim, tipo,categorias, produtos} = req.body;
     let produtosPorCategoria = []
+    let temMenorQueUm = false
     let produtosPorId:any = []
     let today = new Date()
     let isAgendado = new Date(data_inicio) > today ? true : false
@@ -21,12 +22,12 @@ export class PromocaoController {
 
     if(categorias.length > 0) {
       for(let i = 0; i < categorias.length; i++) {
-        const produtos = await prisma.produto.findMany({
+        const produtos_categoria = await prisma.produto.findMany({
           where: {
             categoriasId: Number(categorias[i])
           }
         })
-        produtosPorCategoria.push(...produtos)
+        produtosPorCategoria.push(...produtos_categoria)
       }
       produtosPorId = produtosPorCategoria.map((produto:any) => produto.id)
     }
@@ -38,6 +39,33 @@ export class PromocaoController {
         }
       });
     }
+
+    if(produtosPorId.length > 0){
+      for(let i = 0; i < produtosPorId.length; i++) {
+        await prisma.produto.findFirst({
+          where: {
+            id: Number(produtosPorId[i])
+          }
+        }).then((produto: any) => {
+          if(tipo === "porcentual") {
+            if(produto.valor - (produto.valor * (valor_desconto / 100)) <= 1) {
+              temMenorQueUm = true
+              return
+            }
+          } else {
+            if(produto.valor - valor_desconto <= 1) {
+              temMenorQueUm = true
+              return
+            }
+          }
+        })
+      }
+    }
+
+    if (temMenorQueUm) { 
+      return res.status(400).json({error: 'Erro ao cadastrar promoção'})
+    } 
+      
 
     const promocao = await prisma.promocao.create({
       data: {
