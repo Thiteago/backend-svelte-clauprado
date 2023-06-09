@@ -1,11 +1,101 @@
 import { PrismaClient } from "@prisma/client";
+import { DateTime } from "luxon";
 import { hash } from "bcryptjs";
 const prisma = new PrismaClient();
 
+main()
+
 async function main(){
+
+  const nomes = [
+    "Emma",
+    "Liam",
+    "Olivia",
+    "Noah",
+    "Ava",
+    "Isabella",
+    "Sophia",
+    "Mia",
+    "Jackson",
+    "Aiden",
+    "Lucas",
+    "Caden",
+    "Harper",
+    "Charlotte",
+    "Amelia",
+    "Ethan",
+    "Benjamin",
+    "Elijah",
+    "Oliver",
+    "Daniel",
+    "Alexander",
+    "James",
+    "Samuel",
+    "Henry",
+    "Grace"
+  ]
+
+  const ruas: any = [
+    "Main Street",
+    "Elm Street",
+    "Maple Avenue",
+    "Oak Drive",
+    "Pine Street",
+    "Cedar Lane",
+    "Walnut Avenue",
+    "Cherry Lane",
+    "Willow Street",
+    "Birch Avenue",
+    "Magnolia Drive",
+    "Chestnut Street",
+    "Ash Lane",
+    "Sycamore Avenue",
+    "Poplar Drive",
+    "Juniper Street",
+    "Hickory Lane",
+    "Cypress Avenue",
+    "Mulberry Street",
+    "Spruce Drive",
+    "Beech Lane",
+    "Cottonwood Avenue",
+    "Cactus Street",
+    "Acacia Drive",
+    "Olive Lane"
+  ]
+
+  const produtos = [
+    "Balões",
+    "Chapéus de Festa",
+    "Confetes",
+    "Serpentinas",
+    "Pratos de Festa",
+    "Copos",
+    "Guardanapos",
+    "Toalha de Mesa",
+    "Decorações de Festa",
+    "Lembrancinhas de Festa",
+    "Convites de Festa",
+    "Enfeites de Bolo",
+    "Velas",
+    "Jogos para Festa",
+    "Pinhatas",
+    "Talheres Descartáveis",
+    "Canudos",
+    "Mexedores de Bebida",
+    "Bandeiras de Festa",
+    "Acessórios para Cabine de Fotos",
+    "Fundos para Festa",
+    "Apitos",
+    "Cornetas",
+    "Estourador de Festa",
+    "Utensílios Descartáveis de Mesa"
+]
 
   let hash_password = await hash("123456", 8)
   let hash_admin_password = await hash("adminclau", 8)
+  let users:any = []
+  let enderecos:any = []
+  let produtosCadastrados:any = []
 
   let user_admin = await prisma.user.upsert({
     where: { email: 'admin@clauprado.com'},
@@ -22,320 +112,143 @@ async function main(){
       status: "Ativo"
     }
   })
+  
 
-  let user_joao = await prisma.user.upsert({
-      where: { email: 'joao@gmail.com'},
+  await prisma.endereco.upsert({
+    where: { rua: 'Rua do Admin'},
+    update: {},
+    create: {
+      rua: 'Rua do Admin',
+      numeroRua: "2667",
+      bairro: "Centro",
+      cidade: "Lorena",
+      estado: "SP",
+      cep: "12600-000",
+      principal: true,
+      user: {
+        connect: {
+          id: user_admin.id
+        }
+      }
+    }
+  })
+
+
+
+  nomes.forEach((nome) => {
+    users.push(
+      prisma.user.upsert({
+      where: { email: `${
+        nome.toLowerCase()
+      }@clauprado.com`},
       update: {},
       create: {
-        nome: "João",
-        dataNascimento: "1999-01-01",
-        email: 'joao@gmail.com',
+        nome: nome,
+        dataNascimento: "1998-12-27",
+        email: `${
+          nome.toLowerCase()
+        }@clauprado.com`,
         senha: hash_password,
-        cpf: '12345678910',
+        cpf: '42524592812',
         numeroTel: "123456789",
-        numeroCel: "123456789",
+        numeroCel: "12997431974",
         cargo: "Usuario",
         status: "Ativo"
       }
+    }))
   })
 
-  let user_maria = await prisma.user.upsert({
-    where: { email: 'maria@gmail.com'},
-    update: {},
-    create: {
-      nome: "Maria",
-      dataNascimento: "1999-01-01",
-      email: 'maria@gmail.com',
-      senha: hash_password,
-      cpf: '12345678911',
-      numeroTel: "123456789",
-      numeroCel: "123456789",
-      cargo: "Usuario",
-      status: "Ativo"
-    }
-  })
-
-  let user_jose = await prisma.user.upsert({
-    where: { email: 'jose@gmail.com'},
-    update: {},
-    create: {
-      nome: "jose",
-      dataNascimento: "1999-01-01",
-      email: 'jose@gmail.com',
-      senha: hash_password,
-      cpf: '12345678912',
-      numeroTel: "123456789",
-      numeroCel: "123456789",
-      cargo: "Usuario",
-      status: "Ativo"
-    }
-  })
-
-  let user_pedro = await prisma.user.upsert({
-    where: { email: 'pedro@gmail.com'},
-    update: {},
-    create: {
-      nome: "pedro",
-      dataNascimento: "1999-01-01",
-      email: 'pedro@gmail.com',
-      senha: hash_password,
-      cpf: '12345678913',
-      numeroTel: "123456789",
-      numeroCel: "123456789",
-      cargo: "Usuario",
-      status: "Ativo"
-    }
-  })
-
-  let ids = [user_joao.id, user_maria.id, user_jose.id, user_pedro.id]
-
-  for(let i = 1; i <= 4; i++){
-    let endereco = await prisma.endereco.create({
-      data: 
-      {
-        rua: `Rua ${i}`,
-        numeroRua: `${i}`,
-        bairro: `Bairro ${i}`,
-        cidade: `Cidade ${i}`,
-        estado: `Estado ${i}`,
-        cep: `${i}2345678`,
+  ruas.forEach((rua: any, i: string | number) => {
+    enderecos.push(prisma.endereco.upsert({
+      where: {rua: rua },
+      update: {},
+      create: {
+        rua: rua,
+        numeroRua: "123",
+        bairro: "Centro",
+        cidade: "Lorena",
+        estado: "SP",
+        cep: "12600-000",
         principal: true,
-        
         user: {
-          connect: { id: ids[i] },
-        },
-      },
-    })
-
-    if(i == 1){
-      await prisma.endereco.create({
-        data:
-        {
-          rua: 'Av Castelo Branco',
-          numeroRua: '2667',
-          bairro: 'Morro do Elefante',
-          cidade: 'Campos do Jordão',
-          estado: 'SP',
-          cep: '12460000',
-          principal: true,
-
-          user: {
-            connect: { id: user_admin.id },
+          connect: {
+            id: users[i].id
           }
         }
-      })
-    }
-    let produto:any = []
-    if(i%2 == 0){
-      produto = await prisma.produto.create({
-        data: 
-        {
-          nome: `Produto ${i}`,
-          descricao: `Descrição ${i}`,
-          dataFabricacao: new Date("2021-01-01"),
-          dataPublicacao: new Date("2021-01-01"),
-          quantidadeEmEstoque: 1,
-          peso: 1,
-          valor: 1,
-          altura: "1",
-          largura: "1",
-          comprimento: "1",
-          material: "Material",
-          categoria: "Topo de Bolo",
-          imagens: ["Imagem"],
-          tipo: "Aluguel",
-          status: "Ativo"
-        }
-      })
-    }else{
-      produto = await prisma.produto.create({
-        data: 
-        {
-          nome: `Produto ${i}`,
-          descricao: `Descrição ${i}`,
-          dataFabricacao: new Date("2021-01-01"),
-          dataPublicacao: new Date("2021-01-01"),
-          quantidadeEmEstoque: 1,
-          peso: 1,
-          valor: 1,
-          altura: "1",
-          largura: "1",
-          comprimento: "1",
-          material: "Material",
-          categoria: "Topo de Bolo",
-          imagens: ["Imagem"],
-          tipo: "Venda",
-          status: "Ativo"
-        }
-      })
-    }
+      }
+    }))
+  })
 
-    if(i == 1){
-      await prisma.promocao.create({
-        data:
-        {
-          nome: `Promoção ${i}`,
-          data_fim: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000),
-          categorias: ["Categoria"],
-          valor_desconto: 1,
-          tipo: "porcentual",
-          status: "Ativo",
+  produtos.forEach((produto, i) => {
+    produtosCadastrados.push(prisma.produto.upsert({
+      where: { nome: produto },
+      update: {},
+      create: {
+        nome: produto,
+        descricao: "Descrição do produto",
+        dataFabricacao: "2021-01-01",
+        dataPublicacao: "2021-01-01",
+        quantidadeEmEstoque: 25,
+        peso: 0.5,
+        valor: 10.00,
+        altura: "10cm",
+        largura: "10cm",
+        comprimento: "10cm",
+        material: "Papel",
+        imagens: '1686086757905_1530909586240.png',
+        tipo: i % 2 == 0 ? "Venda" : "Aluguel", 
+        status: "Ativo",
+      }
+    }))
+  })
 
-          produtos: {
-            connect: { id: produto.id },
-          },
+  await prisma.promocao.upsert({
+    where: { nome: "Promoção de Aniversário" },
+    update: {},
+    create: {
+      nome: "Promoção de Aniversário",
+      data_inicio: DateTime.now().toString(),
+      data_fim: DateTime.now().plus({days: 7}).toString(),
+      valor_desconto: 10,
+      tipo: "porcentual",
+      status: "Ativo",
+      produtos: {
+        connect: {
+          id: produtosCadastrados[0].id
         }
-      })
+      }
     }
-    let aluguel:any = []
-    let venda:any = []
-    let pedido:any = []	
-    if(i%2 == 0){
-      aluguel = await prisma.aluguel.create({
-        data: 
-        {
-          data_aluguel: new Date(),
-          data_disponibilidade: new Date(),
-          data_expiracao: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000),
-          status_aluguel: "Disponivel",
-          dias_alugados: 0,
-          tipo: "Aluguel",
+  })
 
-          produto: {
-            connect: { id: produto.id },
-          },
+  for(let i = 0; i <= 11; i++){
+    let produtosAlugados = produtosCadastrados.filter((produto:any) => produto.tipo == "Aluguel")
+    await prisma.aluguel.upsert({
+      where: { id: i },
+      update: {},
+      create: {
+        produto: {
+          connect: {
+            id: produtosAlugados[i].id
+          }
         },
-      })
-      pedido = await prisma.pedido.create({
-        data:
-        {
-          valor: 1,
-          valor_frete: 1,
-          tipo_frete: "PAC",
-          status: "Finalizado",
-          data_envio: new Date(),
-          codigo_rastreio: "123456789",
-          userId: ids[i],
-          enderecoId: endereco.id,
-          
-          alugueis: {
-            connect: { id: aluguel.id },
-          },
-        }
-      })
-    }else{
-      venda = await prisma.venda.create({
-        data:
-        {
-          tipo: "Venda",
-          status_venda: "Disponivel",
-          produtoId: produto.id
-        }
-      })
-      pedido = await prisma.pedido.create({
-        data:
-        {
-          valor: 1,
-          valor_frete: 1,
-          tipo_frete: "PAC",
-          status: "Finalizado",
-          data_envio: new Date(),
-          codigo_rastreio: "123456789",
-          userId: ids[i],
-          enderecoId: endereco.id,
-          
-          vendas: {
-            connect: { id: venda.id },
-          },
-        }
-      })
-    }
-
-    
-
-    let pagamento = await prisma.pagamento.create({
-      data:
-      {
-        data_pagamento: new Date(),
-        valor: 1,
-        forma_pagamento: "Boleto",
-        status: "Pago",
-        vezes: "A vista",
-        pedidoId: pedido.id
-      },
-    })
-
-    let boleto = await prisma.boleto.create({
-      data: 
-      {
-        data_venc: new Date(),
-        valor: 1,
-        linhaDigitavel: "123456789",
-        numeroBoleto: "123456789",
-        nomePDF: "Boleto",
-        pagamentoId: pagamento.id
-      },
-    })
-
-    await prisma.visit.create({
-      data: 
-      {
-        logado: true
-      }
-    })
-
-    await prisma.createdCart.create({
-      data: 
-      {
-        abandonado: false,
-        resultouVenda: false,
-        cartId: i
-      }
-    })
-
-    await prisma.statisticProduct.create({
-      data: 
-      {
-        qtdeVendida: 0,
-        qtdeAlugada: 0,
-        qtdeVisualizada: 0,
-        totalLucro: 0,
-        produtoId: produto.id
-      },
-    })
-
-    await prisma.despesas.create({
-      data: 
-      {
-        valor: 1,
-        data: new Date(),
-        descricao: "Descrição",
-        tipoDespesa: "Tipo",
-        recorrente: false,
-      }
-    })
-
-    await prisma.avaliacoes.create({
-      data: 
-      {
-        nota: 1,
-        titulo: "Titulo",
-        descricao: "Descrição",
-        userId: ids[i],
-        produtoId: produto.id
       }
     })
   }
 
+  for(let i = 0; i <= 12; i++){
+    let produtosComprados = produtosCadastrados.filter((produto:any) => produto.tipo == "Venda")
+    await prisma.venda.upsert({
+      where: { id: i },
+      update: {},
+      create: {
+        produto: {
+          connect: {
+            id: produtosComprados[i].id
+          }
+        },
+      }
+    })
+  }
+
+
 }
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
-  
-
