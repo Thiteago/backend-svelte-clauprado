@@ -36,7 +36,7 @@ async function main(){
       bairro: "Centro",
       cidade: "Lorena",
       estado: "SP",
-      cep: "12600-000",
+      cep: "12460-000",
       principal: true,
       user: {
         connect: {
