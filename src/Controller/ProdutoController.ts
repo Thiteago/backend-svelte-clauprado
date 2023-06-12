@@ -75,13 +75,16 @@ export class ProdutoController{
               }
             })
 
-            for(let i = 0; i< personalizaveis.length; i++){
-              await prisma.produto_mudanca.create({
-                data:{
-                  nome: personalizaveis[i],
-                  vendaId: venda_criada.id
-                }
-              })
+
+            if(Array.isArray(personalizaveis)){
+              for(let i = 0; i< personalizaveis.length; i++){
+                await prisma.produto_mudanca.create({
+                  data:{
+                    nome: personalizaveis[i],
+                    vendaId: venda_criada.id
+                  }
+                })
+              }
             }
           }
    
