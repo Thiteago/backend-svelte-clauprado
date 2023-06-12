@@ -73,16 +73,19 @@ export class CarrinhoController {
   async marcarabandonado(req: Request, res: Response) {
     let id = req.params.id
 
-    await prisma.createdCart.updateMany({
-      where: {
-        cartId: Number(id),
-        resultouVenda: false,
-      },
-      data: {
-        abandonado: true
-      }
-    })
-
+    try{
+      await prisma.createdCart.updateMany({
+        where: {
+          cartId: Number(id),
+          resultouVenda: false,
+        },
+        data: {
+          abandonado: true
+        }
+      })
+    }catch(err){
+      return res.status(400).json({message: 'Carrinho não encontrado'})
+    }
     return res.status(200).json({message: 'Carrinho marcado como abandonado'})
   }
 
