@@ -24,6 +24,7 @@ export class ProdutoController{
       largura, 
       comprimento, 
       material,
+      personalizaveis,
       tipo,
     } = req.body
     peso = parseFloat(peso)
@@ -58,8 +59,6 @@ export class ProdutoController{
               }
             },
             
-
-
             statisticProduct : {
               create: {
                 totalLucro: 0,
@@ -68,14 +67,24 @@ export class ProdutoController{
           },
         }).then(async (produtoCriado: any) => {
           for(let i = 0; i < parseInt(quantidade); i++) {
-            await prisma.venda.create({
+            let venda_criada = await prisma.venda.create({
               data: {
                 produtoId: produtoCriado.id,
                 tipo: "Venda",
                 status_venda: "Disponivel"
               }
             })
+
+            for(let i = 0; i< personalizaveis.length; i++){
+              await prisma.produto_mudanca.create({
+                data:{
+                  nome: personalizaveis[i],
+                  vendaId: venda_criada.id
+                }
+              })
+            }
           }
+   
           res.status(201).json('Sucesso')
         })
       }else{
@@ -109,7 +118,7 @@ export class ProdutoController{
           }
         }).then(async (produtoCriado: any) => {
           for(let i = 0; i < parseInt(quantidade); i++) {
-            await prisma.aluguel.create({
+            let aluguel_criado = await prisma.aluguel.create({
               data: {
                 produtoId: produtoCriado.id,
                 tipo: "Aluguel",
@@ -117,7 +126,18 @@ export class ProdutoController{
                 status_aluguel: 'Disponivel',
               }
             })
+
+            for(let i = 0; i< personalizaveis.length; i++){
+              await prisma.produto_mudanca.create({
+                data:{
+                  nome: personalizaveis[i],
+                  aluguelId: aluguel_criado.id
+                }
+              })
+            }
           }
+
+          
           res.status(201).json('Sucesso')
         })
       }
@@ -157,7 +177,7 @@ export class ProdutoController{
             status_aluguel: "Disponivel"
           }
         },
-        promocao: true
+        promocao: true,
       }
     })
 
@@ -647,15 +667,21 @@ export class ProdutoController{
           Venda: {
             where: {
               status_venda: 'Disponivel'
+            },
+            include: {
+              produto_mudanca: true,
             }
           },
           Aluguel: {
             where: {
               status_aluguel: 'Disponivel'
+            },
+            include: {
+              produto_mudanca: true,
             }
           },
           Categorias: true,
-          promocao: true
+          promocao: true,
         }
     })
   
