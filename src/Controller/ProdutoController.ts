@@ -178,6 +178,7 @@ export class ProdutoController{
           }
         },
         promocao: true,
+        Categorias: true,
       }
     })
 
