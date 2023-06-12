@@ -232,7 +232,6 @@ export class ProdutoController{
         return res.status(500).send('Este nome ja existe!')
       }
     }
-    
     const updateData: any = {
       nome,
       descricao,
@@ -244,10 +243,8 @@ export class ProdutoController{
       largura,
       comprimento,
       material,
-
-      connect: {
-        id: categoria
-      }
+      categoriasId: Number(categoria)
+      
     };
 
     if (ids.length > 0) {
