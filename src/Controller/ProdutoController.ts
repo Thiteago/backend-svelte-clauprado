@@ -173,11 +173,17 @@ export class ProdutoController{
         Venda: {
           where:{
             status_venda: "Disponivel"
+          },
+          include:{
+            produto_mudanca: true
           }
         },
         Aluguel: {
           where:{
             status_aluguel: "Disponivel"
+          },
+          include:{
+            produto_mudanca: true
           }
         },
         promocao: true,
@@ -209,6 +215,7 @@ export class ProdutoController{
       largura,        
       comprimento,    
       material,
+      personalizaveis,
       categoria,   
       peso  
     } = req.body
@@ -225,8 +232,16 @@ export class ProdutoController{
         id: idProduto
       },
       include:{
-        Aluguel: true,
-        Venda: true,
+        Aluguel: {
+          include:{
+            produto_mudanca: true
+          }
+        },
+        Venda: {
+          include:{
+            produto_mudanca: true
+          }
+        },
       }
     })
 
@@ -260,7 +275,6 @@ export class ProdutoController{
         data: updateData,
 
       });
-
       if(tipo == 'Aluguel' && oldProduct){
         if(quantidade > 0 && quantidade > oldProduct.quantidadeEmEstoque){
           if(oldProduct.tipo == 'Aluguel'){
@@ -445,6 +459,35 @@ export class ProdutoController{
             });
           }
         }
+        if(Array.isArray(personalizaveis)){
+          for (let i = 0; i < oldProduct.Aluguel.length; i++) {
+            await prisma.produto_mudanca.deleteMany({
+              where: {
+                aluguelId: oldProduct.Aluguel[i].id,
+                NOT: {
+                  nome: {
+                    in: personalizaveis
+                  }
+                }
+              }
+            });
+          }
+
+          for (let i = 0; i < oldProduct.Aluguel.length; i++) {
+            const produto = oldProduct.Aluguel[i];
+          
+            for (const value of personalizaveis) {
+              if (!produto.produto_mudanca.some(item => item.nome === value)) {
+                await prisma.produto_mudanca.create({
+                  data: {
+                    aluguelId: produto.id,
+                    nome: value,
+                  }
+                });
+              }
+            }
+          }
+        }
         return res.status(201).json('Sucesso');
       }else if(tipo == 'Venda' && oldProduct){
         if(quantidade > 0 && quantidade > oldProduct.quantidadeEmEstoque){
@@ -621,6 +664,22 @@ export class ProdutoController{
                 tipo: 'Venda'
               },
             });
+          }
+        }
+        
+        
+        if(Array.isArray(personalizaveis)){
+          for(let i = 0; i< oldProduct.Venda.length; i++){
+            for(let j = 0; j < personalizaveis.length; j++){
+              await prisma.produto_mudanca.update({
+                where:{
+                  id: oldProduct.Venda[i].produto_mudanca[j].id
+                },
+                data:{
+                  nome: personalizaveis[j].nome,
+                }
+              })
+            }
           }
         }
         return res.status(201).json('Sucesso');
