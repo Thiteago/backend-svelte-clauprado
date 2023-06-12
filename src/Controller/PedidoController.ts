@@ -70,6 +70,18 @@ export class PedidoController {
                 }
               }
             })
+
+            for(let j = 0; j < Object.keys(element.produto_mudanca).length; j++){
+              let valor:any = (Object.values(element.produto_mudanca) as string[])[j]
+              await prisma.produto_mudanca.update({
+                where: {
+                  id: element.Aluguel[i].produto_mudanca[j].id
+                },
+                data: {
+                  valor: valor.value,
+                }
+              })
+            }
           }
         })
       }
@@ -99,6 +111,18 @@ export class PedidoController {
                 }
               }
             })
+
+            for(let j = 0; j < Object.keys(element.produto_mudanca).length; j++){
+              let valor:any = (Object.values(element.produto_mudanca) as string[])[j]
+              await prisma.produto_mudanca.update({
+                where: {
+                  id: element.Venda[i].produto_mudanca[j].id
+                },
+                data: {
+                  valor: valor.value,
+                }
+              })
+            }
           }
         })
       }
@@ -366,12 +390,20 @@ export class PedidoController {
       include: {
         vendas: {
           include: {
-            produto: true,
+            produto: {
+              include: {
+                Categorias: true,
+              }
+            },
           }
         },
         alugueis: {
           include: {
-            produto: true,
+            produto: {
+              include: {
+                Categorias: true,
+            }
+          },
           }
         },
         user: {
@@ -409,12 +441,22 @@ export class PedidoController {
       include: {
         vendas: {
           include: {
-            produto: true,
+            produto: {
+              include: {
+                Categorias: true,
+              }
+            },
+            produto_mudanca: true
           }
         },
         alugueis: {
           include: {
-            produto: true,
+            produto: {
+              include: {
+                Categorias: true,
+              }
+            },
+            produto_mudanca: true
           }
         },
         user: {
