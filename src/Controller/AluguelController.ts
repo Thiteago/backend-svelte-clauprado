@@ -19,12 +19,22 @@ export class AluguelController {
             Pagamento: true,
             vendas: {
               include: {
-                produto: true,
+                produto: {
+                  include: {
+                    Categorias: true,
+                  }
+                },
+                produto_mudanca: true,
               }
             },
             alugueis: {
               include: {
-                produto: true,
+                produto: {
+                  include: {
+                    Categorias: true,
+                  }
+                },
+                produto_mudanca: true,
               }
             },
 
