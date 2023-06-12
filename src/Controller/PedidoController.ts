@@ -361,11 +361,13 @@ export class PedidoController {
         alugueis: {
           include: {
             produto: true,
-          }
+            produto_mudanca: true,
+          },
         },
         vendas: {
           include: {
             produto: true,
+            produto_mudanca: true,
           }
         },
 
