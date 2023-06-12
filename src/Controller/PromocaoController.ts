@@ -154,10 +154,10 @@ export class PromocaoController {
     let { nome, valor_desconto, data_inicio, data_fim, tipo, categorias, produtos } = req.body
     let produtosPorCategoria = []
     let produtosPorId:any = []
-    let today = new Date()
+    let today = new Date().getTime()
     data_inicio = DateTime.fromISO(data_inicio).toJSDate()
     data_fim = DateTime.fromISO(data_fim).toJSDate()
-    let isAgendado = new Date(data_inicio) > today ? true : false
+    let isAgendado = new Date(data_inicio).getTime() > today ? true : false
 
     if(typeof(valor_desconto) === 'string'){
       valor_desconto = valor_desconto.replace('%','')
@@ -189,7 +189,7 @@ export class PromocaoController {
     if(produtos.length > 0) {
       produtos.forEach((element: any)=> {
         if(!produtosPorId.includes(element)){
-          produtosPorId = [...produtosPorId, element]
+          produtosPorId = [...produtosPorId, element.id]
         }
       });
     }
