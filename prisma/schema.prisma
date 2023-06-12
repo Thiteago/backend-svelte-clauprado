@@ -100,6 +100,8 @@ model Aluguel {
   produtoId Int
   Pedido    Pedido? @relation(fields: [pedidoId], references: [id])
   pedidoId  Int?
+
+  produto_mudanca produto_mudanca[]
 }
 
 model Venda {
@@ -112,6 +114,8 @@ model Venda {
 
   produto   Produto @relation(fields: [produtoId], references: [id])
   produtoId Int
+
+  produto_mudanca produto_mudanca[]
 }
 
 model Pedido {
@@ -249,4 +253,15 @@ model Categorias {
 
   produtos  Produto[]
   promocoes Promocao[]
+}
+
+model produto_mudanca {
+  id    Int     @id @default(autoincrement())
+  nome  String
+  valor String? @default("")
+
+  Aluguel   Aluguel? @relation(fields: [aluguelId], references: [id])
+  aluguelId Int?
+  Venda     Venda?   @relation(fields: [vendaId], references: [id])
+  vendaId   Int?
 }
