@@ -130,13 +130,15 @@ export class ProdutoController{
               }
             })
 
-            for(let i = 0; i< personalizaveis.length; i++){
-              await prisma.produto_mudanca.create({
-                data:{
-                  nome: personalizaveis[i],
-                  aluguelId: aluguel_criado.id
-                }
-              })
+            if(Array.isArray(personalizaveis)){
+              for(let i = 0; i< personalizaveis.length; i++){
+                await prisma.produto_mudanca.create({
+                  data:{
+                    nome: personalizaveis[i],
+                    aluguelId: aluguel_criado.id
+                  }
+                })
+              }
             }
           }
 
@@ -699,6 +701,43 @@ export class ProdutoController{
           status_venda: 'Disponivel'
         }
       })
+      const produto = await prisma.produto.findFirst({
+        where: {
+          id: idProduto
+        },
+        include:{
+          Aluguel: true,
+          Venda: true
+        }
+      })
+
+      if(produto){
+        if(produto.Aluguel.length > 0){
+          for(let i = 0; i < produto.Aluguel.length; i++){
+            try{
+              await prisma.produto_mudanca.deleteMany({
+                where: {
+                  aluguelId: produto.Aluguel[i].id 
+                }
+              })
+            }catch(e){
+              console.error('failed to delete produto_mudanca')
+            }
+          }
+        }else if(produto.Venda.length > 0){
+          for(let i = 0; i < produto.Venda.length; i++){
+            try{
+              await prisma.produto_mudanca.deleteMany({
+                where:{
+                  vendaId: produto.Venda[i].id
+                }
+              })
+            }catch(e){
+              console.error('failed to delete produto_mudanca')
+            }
+          }
+        }
+      }
 
       await prisma.aluguel.deleteMany({
         where: {
@@ -706,6 +745,7 @@ export class ProdutoController{
           status_aluguel: 'Disponivel'
         }
       })
+
 
       await prisma.produto.update({
         where: { id: idProduto },
