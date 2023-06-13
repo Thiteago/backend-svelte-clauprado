@@ -37,8 +37,8 @@ model Endereco {
   estado    String
   principal Boolean @default(false)
 
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
 
   pedido Pedido[]
 }
