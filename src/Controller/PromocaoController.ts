@@ -127,7 +127,11 @@ export class PromocaoController {
         status: "Ativo"
       },
       include: {
-        produtos: true
+        produtos: {
+          where: {
+            status: "Ativo"
+          }
+        }
       }
     })
     if(!promocoes || promocoes.length === 0) {
